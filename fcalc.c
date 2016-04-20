@@ -21,13 +21,14 @@
 #include <stdlib.h>
 
 
-int main( int hn, char *hinfo[] ){
+int main( int an, char *arginp[] ){
 	float number1 = 0;
 	float number2 = 0;
 	float ans = 0;
 	int sswitch = 0;
 	char *s = calloc(1, sizeof(char));
-	char *h = "--help";
+	char *h = "help";
+	char *l = "legal";
 
 	if (s == NULL) {
 	
@@ -36,25 +37,30 @@ int main( int hn, char *hinfo[] ){
 
 	}
 
-	if (hn == 2) {
-        	if (*hinfo[1] == *h) {
+	if (an == 2) {
+        	if (*arginp[1] == *h) {
                 	puts("This is free calc, a symple multi platform calulator");
 			printf("\nUsage: numm1 sym numm2\ne.g. 12 * 12\n\n");
-    			printf("Copyright (C) 2016 Perrin Smith\n\n");
-			printf("This program is free software: you can redistribute it and/or modify\n");
-			printf("it under the terms of the GNU General Public License as published by\n");
-			printf("the Free Software Foundation, either version 3 of the License, or\n");
-			printf("any later version.\n\n");
-			printf("This program is distributed in the hope that it will be useful,\n");
-			printf("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
-			printf("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
-  			printf("See the GNU General Public License for more details.\n\n");
-			printf("You should have received a copy of the GNU General Public License\n");
-			printf("along with this program.  If not, see <http://www.gnu.org/licenses/>.\n");
 			goto END;
         	}
+		else if (*arginp[1] == *l) {
+			printf("This is free calc, a symple multi platform calulator");
+			printf("Copyright (C) 2016 Perrin Smith\n\n");
+                        printf("This program is free software: you can redistribute it and/or modify\n");
+                        printf("it under the terms of the GNU General Public License as published by\n");
+                        printf("the Free Software Foundation, either version 3 of the License, or\n");
+                        printf("any later version.\n\n");
+                        printf("This program is distributed in the hope that it will be useful,\n");
+                        printf("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
+                        printf("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n");
+                        printf("See the GNU General Public License for more details.\n\n");
+                        printf("You should have received a copy of the GNU General Public License\n");
+                        printf("along with this program.  If not, see <http://www.gnu.org/licenses/>.\n");
+                        goto END;
+
+		}
 		else {
-			puts("Type '--help' for help and legal info");
+			puts("Type 'help' for help or 'legal' for legal info");
 			goto END;
 		}
 	}
