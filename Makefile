@@ -8,5 +8,5 @@ free_calc: fcalc.c
 install: fcalc
 	mv $(TARGET) /usr/bin/$(TARGET)
 
-clean:
+clean: fcalc
 	$(RM) $(TARGET)
