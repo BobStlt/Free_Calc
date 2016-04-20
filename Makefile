@@ -1,10 +1,12 @@
 CC=gcc
+CFLAGS = -Wall
+TARGET = fcalc
 
 free_calc: fcalc.c
-	$(CC) fcalc.c -o fcalc
+	$(CC) $(CFLAGS) fcalc.c -o fcalc
 
 install: fcalc
-	mv fcalc /usr/bin/fcalc
+	mv $(TARGET) /usr/bin/$(TARGET)
 
 clean:
-	rm fcalc
+	$(RM) $(TARGET)
