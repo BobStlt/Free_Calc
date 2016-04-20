@@ -57,7 +57,6 @@ int main( int an, char *arginp[] ){
                         printf("You should have received a copy of the GNU General Public License\n");
                         printf("along with this program.  If not, see <http://www.gnu.org/licenses/>.\n");
                         goto END;
-
 		}
 		else {
 			puts("Type 'help' for help or 'legal' for legal info");
