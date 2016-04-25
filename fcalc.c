@@ -40,7 +40,8 @@ int main( int an, char *arginp[] ){
 	if (an == 2) {
         	if (*arginp[1] == *h) {
                 	puts("This is free calc, a symple multi platform calulator");
-			printf("\nUsage: numm1 sym numm2\ne.g. 12 * 12\n\n");
+			printf("\nUsage: numm1 sym numm2\ne.g. 12 * 12\n");
+			printf("To exit type 'q q' then return\n\n");
 			goto END;
         	}
 		else if (*arginp[1] == *l) {
@@ -64,7 +65,7 @@ int main( int an, char *arginp[] ){
 		}
 	}
 
-	printf("Type:'q q' then press return to exit\n:");
+	printf(":");
 	scanf("%f %s %f", &number1,s, &number2);
 	
 	switch (*s) {
