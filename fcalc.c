@@ -51,8 +51,8 @@ int main( int an, char *arginp[] ){
                         printf("%s", KRED);
                 	puts("This is free calc, a symple multi platform calulator");
                         printf("%s", KNRM);
-			printf("\n%sUsage: numm1 sym numm2%s\ne.g. 12 * 12\n", KBLU, KNRM);
-                        printf("then after %sans%s sym numm2\n", KGRN, KNRM);
+			printf("\nUsage: %snumm1 sym numm2%s\ne.g. 12 * 12\n", KCYN, KNRM);
+                        printf("then after %sans%s sym numm2%s\n", KGRN, KCYN, KNRM);
 			printf("To exit type 'q q' then return\n\n");
                         printf("%s", KNRM);
 			goto END;
