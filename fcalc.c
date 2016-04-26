@@ -50,8 +50,9 @@ int main( int an, char *arginp[] ){
         	if (*arginp[1] == *h) {
                         printf("%s", KRED);
                 	puts("This is free calc, a symple multi platform calulator");
-                        printf("%s", KGRN);
-			printf("\nUsage: numm1 sym numm2\ne.g. 12 * 12\n");
+                        printf("%s", KNRM);
+			printf("\n%sUsage: numm1 sym numm2%s\ne.g. 12 * 12\n", KBLU, KNRM);
+                        printf("then after %sans%s sym numm2\n", KGRN, KNRM);
 			printf("To exit type 'q q' then return\n\n");
                         printf("%s", KNRM);
 			goto END;
