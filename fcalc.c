@@ -20,6 +20,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
 
 int main( int an, char *arginp[] ){
 	float number1 = 0;
@@ -31,20 +39,25 @@ int main( int an, char *arginp[] ){
 	char *l = "legal";
 
 	if (s == NULL) {
-	
+	printf("%s", KRED);
 	perror("Memory allocation failed");
+        printf("%s", KNRM);
 	return -1;	
 
 	}
 
 	if (an == 2) {
         	if (*arginp[1] == *h) {
+                        printf("%s", KRED);
                 	puts("This is free calc, a symple multi platform calulator");
+                        printf("%s", KGRN);
 			printf("\nUsage: numm1 sym numm2\ne.g. 12 * 12\n");
 			printf("To exit type 'q q' then return\n\n");
+                        printf("%s", KNRM);
 			goto END;
         	}
 		else if (*arginp[1] == *l) {
+                        printf("%s", KRED);
 			printf("This is free calc, a symple multi platform calulator");
 			printf("Copyright (C) 2016 Perrin Smith\n\n");
                         printf("This program is free software: you can redistribute it and/or modify\n");
@@ -57,6 +70,7 @@ int main( int an, char *arginp[] ){
                         printf("See the GNU General Public License for more details.\n\n");
                         printf("You should have received a copy of the GNU General Public License\n");
                         printf("along with this program.  If not, see <http://www.gnu.org/licenses/>.\n");
+                        printf("%s", KNRM);
                         goto END;
 		}
 		else {
@@ -65,33 +79,45 @@ int main( int an, char *arginp[] ){
 		}
 	}
 
+        printf("%s", KRED);
 	printf(":");
+        printf("%s", KNRM);
 	scanf("%f %s %f", &number1,s, &number2);
 	
 	switch (*s) {
 
 	case '+':
+                printf("%s", KWHT);
         	printf("\n= %f", number1 + number2);
+                printf("%s", KNRM);
         	ans = number1 + number2;
 		break;
 	
 	case '-':
+                printf("%s", KWHT);
 		printf("\n= %f", number1 - number2);
+                printf("%s", KNRM);
         	ans = number1 - number2;
 		break;
     
 	case '*':
+                printf("%s", KWHT);
 		printf("\n= %f", number1 * number2);
+                printf("%s", KNRM);
 		ans = number1 * number2;
 		break;
 
 	case 'x':
+                printf("%s", KWHT);
 		printf("\n= %f", number1 * number2);
+                printf("%s", KNRM);
                 ans = number1 * number2;
                 break;	
 
 	case '/':
+                printf("%s", KWHT);
 		printf("\n= %f", number1 / number2);
+                printf("%s", KNRM);
 		ans = number1 / number2;
 		break;
 	
@@ -102,38 +128,52 @@ int main( int an, char *arginp[] ){
 
 	do {
 		number2 = 0;
+                printf("%s", KGRN);
 		printf("\nans ");
+                printf("%s", KNRM);
 		scanf("%s %f", s, &number2);
 			
 		switch (*s) {
 		
 		case '+':
+                        printf("%s", KWHT);
 			printf("= %f\n", ans + number2);
+                        printf("%s", KNRM);
 			ans = ans + number2;
 			break;
         
 		case '-':
+                        printf("%s", KWHT);
 			printf("= %f\n", ans - number2);
+                        printf("%s", KNRM);
 			ans = ans - number2;
 			break;
 
 		case '*':
+                        printf("%s", KWHT);
                 	printf("\n= %f", ans * number2);
+                        printf("%s", KNRM);
                 	ans = ans * number2;
                 	break;
 
 	        case 'x':
+                        printf("%s", KWHT);
                 	printf("\n= %f", ans * number2);
+                        printf("%s", KNRM);
                 	ans = ans * number2;
                 	break;
 	
 		case '/':
+                        printf("%s", KWHT);
 			printf("= %f\n", ans / number2);
+                        printf("%s", KNRM);
 			ans = ans / number2;
 			break;
 		
 		default:
+                        printf("%s", KWHT);
 			printf("= %f\n",ans);
+                        printf("%s", KNRM);
 			goto END;
 		}
 	} while (sswitch == 0);
