@@ -16,6 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+/*
+    To do:
+    
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,7 +53,7 @@ int main( int an, char *arginp[] ){
 	if (an == 2) {
         	if (*arginp[1] == *h) {
                         printf("%s", KRED);
-                	puts("This is free calc, a symple multi platform calulator");
+                	puts("This is free calc, a simple multi platform calulator");
                         printf("%s", KNRM);
 			printf("\nUsage: %snumm1 sym numm2%s\ne.g. %s12 * 12%s\n", KCYN, KNRM, KCYN, KNRM);
                         printf("then after %sans%s sym numm2%s\n", KGRN, KCYN, KNRM);
@@ -75,7 +79,6 @@ int main( int an, char *arginp[] ){
                         goto END;
 		}
 		else {
-			puts("Type 'help' for help or 'legal' for legal info");
 			goto END;
 		}
 	}
@@ -182,6 +185,7 @@ int main( int an, char *arginp[] ){
 	//printf("\n%f", ans); for debug
 
 	END:
+        printf("Type %shelp%s for help or %slegal%s for legal info\n", KCYN, KNRM, KCYN, KNRM);
 	free(s);
 	return 0;
 }
