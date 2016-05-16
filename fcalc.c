@@ -63,7 +63,7 @@ int main( int an, char *arginp[] ){
         	}
 		else if (*arginp[1] == *l) {
                         printf("%s", KRED);
-			printf("This is free calc, a symple multi platform calulator");
+			printf("This is free calc, a symple multi platform calulator\n");
 			printf("Copyright (C) 2016 Perrin Smith\n\n");
                         printf("This program is free software: you can redistribute it and/or modify\n");
                         printf("it under the terms of the GNU General Public License as published by\n");
