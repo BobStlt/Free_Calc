@@ -29,11 +29,101 @@
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
 
+float calc(float number1, char *s, float number2, float ans){
+if (ans != 0){
+		switch (*s) {
+		
+		case '+':
+                        printf("%s", KWHT);
+			printf("= %f\n", ans + number2);
+                        printf("%s", KNRM);
+			ans = ans + number2;
+			break;
+        
+		case '-':
+                        printf("%s", KWHT);
+			printf("= %f\n", ans - number2);
+                        printf("%s", KNRM);
+			ans = ans - number2;
+			break;
+
+		case '*':
+                        printf("%s", KWHT);
+                	printf("\n= %f", ans * number2);
+                        printf("%s", KNRM);
+                	ans = ans * number2;
+                	break;
+
+	        case 'x':
+                        printf("%s", KWHT);
+                	printf("\n= %f", ans * number2);
+                        printf("%s", KNRM);
+                	ans = ans * number2;
+                	break;
+	
+		case '/':
+                        printf("%s", KWHT);
+			printf("= %f\n", ans / number2);
+                        printf("%s", KNRM);
+			ans = ans / number2;
+			break;
+		
+		default:
+						printf("%s", KWHT);
+			printf("= %f\n",ans);
+                        printf("%s", KNRM);
+		}
+}
+else if(ans == 0){
+switch (*s) {
+
+	case '+':
+                printf("%s", KWHT);
+        	printf("\n= %f", number1 + number2);
+                printf("%s", KNRM);
+        	ans = number1 + number2;
+		break;
+	
+	case '-':
+                printf("%s", KWHT);
+		printf("\n= %f", number1 - number2);
+                printf("%s", KNRM);
+        	ans = number1 - number2;
+		break;
+    
+	case '*':
+                printf("%s", KWHT);
+		printf("\n= %f", number1 * number2);
+                printf("%s", KNRM);
+		ans = number1 * number2;
+		break;
+
+	case 'x':
+                printf("%s", KWHT);
+		printf("\n= %f", number1 * number2);
+                printf("%s", KNRM);
+                ans = number1 * number2;
+                break;	
+
+	case '/':
+                printf("%s", KWHT);
+		printf("\n= %f", number1 / number2);
+                printf("%s", KNRM);
+		ans = number1 / number2;
+		break;
+	
+	default:
+	        return 0;
+
+	}
+}
+return ans;
+}
+
 int main( int an, char *arginp[] ){
 	float number1 = 0;
 	float number2 = 0;
 	float ans = 0;
-	int sswitch = 0;
 	char *s = calloc(1, sizeof(char));
 	char *h = "help";
 	char *l = "legal";
@@ -84,100 +174,22 @@ int main( int an, char *arginp[] ){
 	printf(":");
         printf("%s", KNRM);
 	scanf("%f %s %f", &number1,s, &number2);
-	
-	switch (*s) {
+	ans = calc(number1, s, number2, ans);
 
-	case '+':
-                printf("%s", KWHT);
-        	printf("\n= %f", number1 + number2);
-                printf("%s", KNRM);
-        	ans = number1 + number2;
-		break;
-	
-	case '-':
-                printf("%s", KWHT);
-		printf("\n= %f", number1 - number2);
-                printf("%s", KNRM);
-        	ans = number1 - number2;
-		break;
-    
-	case '*':
-                printf("%s", KWHT);
-		printf("\n= %f", number1 * number2);
-                printf("%s", KNRM);
-		ans = number1 * number2;
-		break;
 
-	case 'x':
-                printf("%s", KWHT);
-		printf("\n= %f", number1 * number2);
-                printf("%s", KNRM);
-                ans = number1 * number2;
-                break;	
-
-	case '/':
-                printf("%s", KWHT);
-		printf("\n= %f", number1 / number2);
-                printf("%s", KNRM);
-		ans = number1 / number2;
-		break;
-	
-	default:
-		goto END;
-	}
-		
-
-	do {
+while(1){
 		number2 = 0;
                 printf("%s", KGRN);
 		printf("\nans ");
                 printf("%s", KNRM);
 		scanf("%s %f", s, &number2);
-			
-		switch (*s) {
-		
-		case '+':
-                        printf("%s", KWHT);
-			printf("= %f\n", ans + number2);
-                        printf("%s", KNRM);
-			ans = ans + number2;
-			break;
-        
-		case '-':
-                        printf("%s", KWHT);
-			printf("= %f\n", ans - number2);
-                        printf("%s", KNRM);
-			ans = ans - number2;
-			break;
-
-		case '*':
-                        printf("%s", KWHT);
-                	printf("\n= %f", ans * number2);
-                        printf("%s", KNRM);
-                	ans = ans * number2;
-                	break;
-
-	        case 'x':
-                        printf("%s", KWHT);
-                	printf("\n= %f", ans * number2);
-                        printf("%s", KNRM);
-                	ans = ans * number2;
-                	break;
-	
-		case '/':
-                        printf("%s", KWHT);
-			printf("= %f\n", ans / number2);
-                        printf("%s", KNRM);
-			ans = ans / number2;
-			break;
-		
-		default:
-                        printf("%s", KWHT);
-			printf("= %f\n",ans);
-                        printf("%s", KNRM);
+		if (*s == 'q' || *s == 'Q'){
 			goto END;
 		}
-	} while (sswitch == 0);
+
+		ans = calc(number1, s, number2, ans);
+	}
+
 	
 	//printf("\n%f", ans); for debug
 
