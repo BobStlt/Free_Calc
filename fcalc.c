@@ -17,12 +17,15 @@
 */
 
 /*
-    To do:
-    
+	To do:
+	Put in rounding capacilities.
+	Add version information.
+
 */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -32,107 +35,97 @@
 #define KMAG  "\x1B[35m"
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
+#define CLRS  "\x1B[2J"
+#define RSETPOS "\x1B[;H"
 
-float calc(float number1, char *s, float number2, float ans){
-if (ans != 0){
-		switch (*s) {
+float calc(float number1, char *symbol, float number2, float ans, int which_run){
+	
+	float calc_temp;
+	
+	if (which_run == 0){
+	calc_temp = number1;
+	}
+	
+	else {
+		calc_temp = ans;
+	}
+	
+	
+	switch (*symbol) {
 		
 		case '+':
-                        printf("%s", KWHT);
-			printf("= %f\n", ans + number2);
-                        printf("%s", KNRM);
-			ans = ans + number2;
+			printf("%s", KWHT);
+			printf("= %f\n", calc_temp + number2);
+               		printf("%s", KNRM);
+			ans = calc_temp + number2;
 			break;
-        
+        	
 		case '-':
-                        printf("%s", KWHT);
-			printf("= %f\n", ans - number2);
-                        printf("%s", KNRM);
-			ans = ans - number2;
+			printf("%s", KWHT);
+			printf("= %f\n", calc_temp - number2);
+			printf("%s", KNRM);
+			ans = calc_temp - number2;
 			break;
-
+		
+		case 'X':
+		case 'x':
 		case '*':
-                        printf("%s", KWHT);
-                	printf("\n= %f", ans * number2);
-                        printf("%s", KNRM);
-                	ans = ans * number2;
-                	break;
-
-	        case 'x':
-                        printf("%s", KWHT);
-                	printf("\n= %f", ans * number2);
-                        printf("%s", KNRM);
-                	ans = ans * number2;
+			printf("%s", KWHT);
+			printf("\n= %f", calc_temp * number2);
+			printf("%s", KNRM);
+               		ans = calc_temp * number2;
                 	break;
 	
 		case '/':
-                        printf("%s", KWHT);
-			printf("= %f\n", ans / number2);
-                        printf("%s", KNRM);
-			ans = ans / number2;
+			printf("%s", KWHT);
+			printf("= %f\n", calc_temp / number2);
+                	printf("%s", KNRM);
+			ans = calc_temp / number2;
 			break;
-		
+			
 		default:
-						printf("%s", KWHT);
-			printf("= %f\n",ans);
-                        printf("%s", KNRM);
-		}
-}
-else if(ans == 0){
-switch (*s) {
-
-	case '+':
-                printf("%s", KWHT);
-        	printf("\n= %f", number1 + number2);
-                printf("%s", KNRM);
-        	ans = number1 + number2;
-		break;
-	
-	case '-':
-                printf("%s", KWHT);
-		printf("\n= %f", number1 - number2);
-                printf("%s", KNRM);
-        	ans = number1 - number2;
-		break;
-    
-	case '*':
-                printf("%s", KWHT);
-		printf("\n= %f", number1 * number2);
-                printf("%s", KNRM);
-		ans = number1 * number2;
-		break;
-
-	case 'x':
-                printf("%s", KWHT);
-		printf("\n= %f", number1 * number2);
-                printf("%s", KNRM);
-                ans = number1 * number2;
-                break;	
-
-	case '/':
-                printf("%s", KWHT);
-		printf("\n= %f", number1 / number2);
-                printf("%s", KNRM);
-		ans = number1 / number2;
-		break;
-	
-	default:
-	        return 0;
-
+			printf("%s", KWHT);
+			if (which_run == 0){
+				return -1;
+			}
+			else {
+				printf("= %f\n",ans);
+			}
+			printf("%s", KNRM);
+		
 	}
-}
-return ans;
+
+	return ans;
 }
 
-int main( int an, char *arginp[] ){
+
+
+
+
+/*char rounding( float ans ){
+	char rounded_no[246];
+	float flt_tmp = 0;
+	
+	//flt_tmp = floor(ans);
+	printf("%.1lf\n", floor(ans));
+	
+	return 0; //rounded_no;
+} */
+
+
+
+
+
+int main( int no_of_args, char *arginp[] ){
 	float number1 = 0;
 	float number2 = 0;
 	float ans = 0;
-	char *s = calloc(1, sizeof(char));
+	char *symbol = calloc(1, sizeof(char));
 	char *h = "help";
 	char *l = "legal";
+	int which_run = 0;
 
-	if (s == NULL) {
+	if (symbol == NULL) {
 	printf("%s", KRED);
 	perror("Memory allocation failed");
         printf("%s", KNRM);
@@ -140,7 +133,7 @@ int main( int an, char *arginp[] ){
 
 	}
 
-	if (an == 2) {
+	if (no_of_args == 2) {
         	if (*arginp[1] == *h) {
                         printf("%s", KRED);
                 	puts("This is free calc, a simple multi platform calulator");
@@ -153,11 +146,7 @@ int main( int an, char *arginp[] ){
         	}
 		else if (*arginp[1] == *l) {
                         printf("%s", KRED);
-<<<<<<< HEAD
-			printf("This is free calc, a symple multi platform calulator\n");
-=======
 			printf("This is free calc, a symple multi platform calulator\n\n");
->>>>>>> testing
 			printf("Copyright (C) 2016 Perrin Smith\n\n");
                         printf("This program is free software: you can redistribute it and/or modify\n");
                         printf("it under the terms of the GNU General Public License as published by\n");
@@ -176,25 +165,29 @@ int main( int an, char *arginp[] ){
 			goto END;
 		}
 	}
+	
 
+	printf("%s", CLRS);
+	printf("%s", RSETPOS);
         printf("%s", KRED);
 	printf(":");
         printf("%s", KNRM);
-	scanf("%f %s %f", &number1,s, &number2);
-	ans = calc(number1, s, number2, ans);
+	scanf("%f %s %f", &number1, symbol, &number2);
+	ans = calc(number1, symbol, number2, ans, which_run);
 
 
-while(1){
-		number2 = 0;
-                printf("%s", KGRN);
-		printf("\nans ");
-                printf("%s", KNRM);
-		scanf("%s %f", s, &number2);
-		if (*s == 'q' || *s == 'Q'){
-			goto END;
-		}
-
-		ans = calc(number1, s, number2, ans);
+	while(1){
+			which_run = which_run + 1;
+			number2 = 0;
+               		printf("%s", KGRN);
+			printf("\nans ");
+        	        printf("%s", KNRM);
+			scanf("%s %f", symbol, &number2);
+			if (*symbol == 'q' || *symbol == 'Q'){
+				goto END;
+			}
+	
+			ans = calc(number1, symbol, number2, ans, which_run);
 	}
 
 	
@@ -202,6 +195,6 @@ while(1){
 
 	END:
         printf("Type %shelp%s for help or %slegal%s for legal info\n", KCYN, KNRM, KCYN, KNRM);
-	free(s);
+	free(symbol);
 	return 0;
 }
