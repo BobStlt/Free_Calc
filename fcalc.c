@@ -26,19 +26,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
-#define KNRM  "\x1B[0m"
-#define KRED  "\x1B[31m"
-#define KGRN  "\x1B[32m"
-#define KYEL  "\x1B[33m"
-#define KBLU  "\x1B[34m"
-#define KMAG  "\x1B[35m"
-#define KCYN  "\x1B[36m"
-#define KWHT  "\x1B[37m"
-#define CLRS  "\x1B[2J"
-#define RSETPOS "\x1B[;H"
+#define KNRM  "\x1B[0m"  //sets colour back to default 
+#define KRED  "\x1B[31m" //sets colour to red
+#define KGRN  "\x1B[32m" //green
+#define KYEL  "\x1B[33m" //yellow
+#define KBLU  "\x1B[34m" //blue
+#define KMAG  "\x1B[35m" //magenta
+#define KCYN  "\x1B[36m" //cyan
+#define KWHT  "\x1B[37m" //white
+#define CLRS  "\x1B[2J"  //Clears the screen
+#define RSETPOS "\x1B[;H"//reset the cursor possition
 
-float calc(float number1, char *symbol, float number2, float ans, int which_run){
+float calc(float number1, char *symbol, float number2, float ans, short which_run){
 	
 	float calc_temp;
 	
@@ -67,9 +68,7 @@ float calc(float number1, char *symbol, float number2, float ans, int which_run)
 			ans = calc_temp - number2;
 			break;
 		
-		case 'X':
-		case 'x':
-		case '*':
+		case 'X': case 'x': case '*':
 			printf("%s", KWHT);
 			printf("\n= %f", calc_temp * number2);
 			printf("%s", KNRM);
@@ -123,13 +122,13 @@ int main( int no_of_args, char *arginp[] ){
 	char *symbol = calloc(1, sizeof(char));
 	char *h = "help";
 	char *l = "legal";
-	int which_run = 0;
+	short which_run = 0;
 
 	if (symbol == NULL) {
 	printf("%s", KRED);
 	perror("Memory allocation failed");
         printf("%s", KNRM);
-	return -1;	
+	return 1;	
 
 	}
 
@@ -173,22 +172,21 @@ int main( int no_of_args, char *arginp[] ){
 	printf(":");
         printf("%s", KNRM);
 	scanf("%f %s %f", &number1, symbol, &number2);
+	if(strcmp(symbol, "q") == 0 || strcmp(symbol,"Q") == 0){
+		goto END;
+	}
 	ans = calc(number1, symbol, number2, ans, which_run);
+	which_run++;
 
-
-	while(1){
-			which_run = which_run + 1;
+	do {
 			number2 = 0;
                		printf("%s", KGRN);
 			printf("\nans ");
         	        printf("%s", KNRM);
-			scanf("%s %f", symbol, &number2);
-			if (*symbol == 'q' || *symbol == 'Q'){
-				goto END;
-			}
-	
+			scanf(" %s %f", symbol, &number2);
 			ans = calc(number1, symbol, number2, ans, which_run);
-	}
+
+	} while(strcmp(symbol, "q") == 0 || strcmp(symbol,"Q"));
 
 	
 	//printf("\n%f", ans); for debug
