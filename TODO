@@ -1,9 +1,13 @@
 Things That are incomplete:
 * In processEquationString the logic is missing the detction of '-''s that
     are not paired with a number (except when they are next to a ')')
+
 * In main the licence info option currently have no function
+
 * In main in the detection of flags from the cmd args there is no distinction
     as to weather a '-' is a flag or the start of a negative number
+
 * There is no support for the insertion of the ans from a previous equation
+
 * In main the main loop only runs once for testing and because the logic for
     resetting has yet to be implimented
