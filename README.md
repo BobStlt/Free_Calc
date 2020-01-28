@@ -5,5 +5,5 @@ Free calc supports fore function calculations as well as the use of brackets.
 For use with small text interfaced operating systems that need
 a simple calculator, such as FreeDos, minix, gnu/linux or bsd...
 
-Freecalc does not use any system spesific libries (only libc) so is highly
+Freecalc does not use any system specific libries (only libc) so is highly
 portable.
