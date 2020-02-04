@@ -1,7 +1,4 @@
 Things That are incomplete:
-* In processEquationString the logic is missing the detction of '-''s that
-    are not paired with a number (except when they are next to a ')')
-
 * In main the licence info option currently have no function
 
 * In main in the detection of flags from the cmd args there is no distinction
