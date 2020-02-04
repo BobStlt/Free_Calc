@@ -6,3 +6,5 @@ Things That are incomplete:
 
 * In main the main loop only runs once for testing and because the logic for
     resetting has yet to be implimented
+
+* Create a function to check the input for errors
