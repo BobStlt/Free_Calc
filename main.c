@@ -22,6 +22,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <assert.h>
 
 #include "SingleLinkedList.h"
 #include "calcFunctions.h"
@@ -143,6 +145,11 @@ int main(int argc, char **args)
         eqaStr = (char*) malloc(EQUATION_STR_LEN*sizeof(char));
         //get the user equation string
         getUserEquation(eqaStr); 
+        //If the user wants to quit
+        if(*eqaStr == 'q' || *eqaStr == 'Q')
+        {
+            exit = true;
+        }
     }
     
     //continuously get user input and calc the answer until they quit
@@ -150,12 +157,22 @@ int main(int argc, char **args)
     {
         processEquationStr(&equationList, eqaStr);
         ansPtr = processPostfixEqa(equationList);
+        /* There is nothing on the stack but as the memory
+         * is not cleared on free the stack logic thinks
+         * there is still data. */
+        equationList = NULL;
+
         printResault(ansPtr);
         //TODO: Before this should be freed we should keep it for insertion as ans
         free(ansPtr);
         ansPtr = NULL;
-        //getUserEquation(eqaStr); //TODO: this is hidden for our run once testing
-        exit = 1; //TODO: this is just for testing
+
+        getUserEquation(eqaStr);
+        //If the user wants to quit
+        if(*eqaStr == 'q' || *eqaStr == 'Q')
+        {
+            exit = true;
+        }
     }
 
     if(ansPtr != NULL) free(ansPtr);
