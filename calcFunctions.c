@@ -134,6 +134,7 @@ static void insertOpts(LinkedList **equationQueue, LinkedList **operandStack)
     }
 }
 
+//This does manipulate the equation position
 double parseNumber(char **equation)
 {
     int firstRun = 1;
@@ -199,12 +200,13 @@ double parseNumber(char **equation)
 int processEquationStr(LinkedList **equationQueue, char *inEquation)
 {
     /* This array is for the cases when we need to insert extra chars into the
-     * equaiton for example if we have a number then a bracket, this indicates
+     * equation for example if we have a number then a bracket, this indicates
      * a maltiplication in this case we must add in the '*' char to the stack
      * so the parser can create the postfix equation correctly */
     /* '*' for between a num and '(' or ')'. '0' for between a '(' and '-' or
      * when we have a '-' at the start of the line */
     static const char addInRuleChars[] = {'*', '(', ')', '0'};
+    bool zeroMinusBefore = false;
     char* equation = inEquation;
     LinkedList *operandStack = NULL; //to hold our symbols while we work out thair ordering.
     //This is for wrighting our data to the equation queue if we're not using the optToStack func
@@ -216,7 +218,42 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
         {
             case '+': //+ and - have the same presidence
             case '-':
-                optToStack(1, equation, &operandStack, equationQueue);
+                /* This is to handle the case where we have a '-' not next to a number */
+                if(*equation == '-')
+                {
+                    /* If we are not past the start of the string or don't have
+                     * a number before where the '-' is or what we have before
+                     * is not a ')' then we have nothing before our '-' */
+                    if((!pos) ||
+                        (((*(equation-1) < '0') || (*(equation-1) > '9')) &&
+                        (*(equation-1) != ')')))
+                    {
+                        /* Add (0 - to the stack if there is nothing next to a zero
+                         * not including a ')' */
+                        //Add a '('
+                        optToStack(2, &addInRuleChars[1], &operandStack, equationQueue);
+
+                        //add a '0' to the equation queue
+                        dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
+                        dataTmp->data.f = 0.0;
+                        dataTmp->type = number;
+                        push(equationQueue, dataTmp);
+
+                        //add the '-'
+                        optToStack(1, equation, &operandStack, equationQueue);
+                        /* sets the flag that allows us to - when it comes to the
+                         * next number - know when to add a ')' after the number */
+                        zeroMinusBefore = true;
+                    }
+                    else
+                    {
+                        optToStack(1, equation, &operandStack, equationQueue);
+                    }
+                }
+                else
+                {
+                    optToStack(1, equation, &operandStack, equationQueue);
+                }
                 break;
 
             case '*': //same for * and /
@@ -248,12 +285,21 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
                 }
                 break;
             
-           default: //If we just have a number 
+           default: //If we just have a number
                 dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
                 //convert the char to int
                 dataTmp->data.f = parseNumber(&equation);
                 dataTmp->type = number;
                 push(equationQueue, dataTmp);
+                
+                //If we had a '-' on it's own before this number
+                //The handling of a '-' by it's self, is done in the '-' section
+                if(zeroMinusBefore)
+                {
+                    /* Emulate a ')' to close the bracket created if a '-' was
+                     * found to be on it's own */
+                    insertOpts(equationQueue, &operandStack);
+                }
                 break;
         }
         equation++; //set the pointer to the charactor ready for the next iteration
