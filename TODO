@@ -1,6 +1,4 @@
 Things That are incomplete:
-* In main the licence info option currently have no function
-
 * In main in the detection of flags from the cmd args there is no distinction
     as to weather a '-' is a flag or the start of a negative number
 

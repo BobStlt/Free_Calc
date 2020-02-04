@@ -36,12 +36,17 @@ void outputPrgInfo(cmdflag flag)
 {
    if(flag == LICENSE)
    {
-        puts("This is where the license should be");
-        //TODO: this should eventually display the end user license agrement
-        FILE *license = fopen("license", "r");
+        FILE *license = fopen("LICENSE", "r");
         if(license != NULL)
         {
-            //TODO
+            int tmp;
+            tmp = fgetc(license);
+            while(tmp != EOF)
+            {
+                printf("%c", (char)tmp);
+                tmp = fgetc(license);
+            }
+            fclose(license);
         }
         else fprintf(stderr, "Sorry I could not show you the license.\n"
                      "It may be missing or may have been renamed\n");
