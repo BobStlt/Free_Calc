@@ -80,7 +80,7 @@ static char *optToStack(int prec1, char *theOpt, LinkedList **operandStack, Link
         if(*operandStack != NULL)
         {
            opTmp = *(char*)(*operandStack)->data; //the top item on the operand stack is
-           if(opTmp == '+' || opTmp == '-') //+ and - have a prec of 1
+           if(opTmp == '+' || opTmp == '=') //+ and - have a prec of 1
            {
                 prec2 = 1;
            }
