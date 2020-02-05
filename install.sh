@@ -1,3 +1,7 @@
+#This is the install script for fcalc under gpl3
+
+#This script is perposefull not directly exicuitable,
+#it is ment only to be used with the make file of fcalc
 
 if [ ! -d $1 ]; then
     echo "Making dir $1"
