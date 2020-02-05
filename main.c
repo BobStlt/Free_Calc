@@ -38,7 +38,7 @@ void outputPrgInfo(cmdflag flag)
 {
    if(flag == LICENSE)
    {
-        FILE *license = fopen("LICENSE", "r");
+        FILE *license = fopen("/usr/share/fcalc/LICENSE", "r");
         if(license != NULL)
         {
             int tmp;

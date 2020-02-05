@@ -1,3 +1,5 @@
+SH= /bin/bash
+
 CC= gcc
 CFLAGS= -Wall
 CFILES= main.c calcFunctions.c inputOutput.c SingleLinkedList.c
@@ -8,6 +10,7 @@ OFILES= $(BUILDDIR)/calcFunctions.o $(BUILDDIR)/inputOutput.o $(BUILDDIR)/Single
 BUILDDIR=Build
 TCODEDIR=TestCode
 INSTDIR= /usr/bin
+LICENSEDIR= /usr/share/fcalc
 EXE= $(BUILDDIR)/calcFunctionsTest $(BUILDDIR)/SingleLinkedListTest $(BUILDDIR)/stackTest $(BUILDDIR)/fcalc $(BUILDDIR)/prototype
 ALLOFILES= $(BUILDDIR)/calcFunctions.o $(BUILDDIR)/inputOutput.o $(BUILDDIR)/SingleLinkedList.o $(BUILDDIR)/stack.o $(BUILDDIR)/calcFunctionsTest.o $(BUILDDIR)/SingleLinkedListTest.o $(BUILDDIR)/stackTest.o $(BUILDDIR)/prototype.o $(BUILDDIR)/main.o
 
@@ -55,8 +58,9 @@ $(BUILDDIR)/stackTest: $(BUILDDIR)/stackTest.o $(BUILDDIR)/stack.o $(BUILDDIR)/S
 $(BUILDDIR)/stackTest.o: $(BUILDDIR)/stack.o $(BUILDDIR)/SingleLinkedList.o $(TCODEDIR)/stackTest.c
 	$(CC) -c $(TCODEDIR)/stackTest.c $(CFLAGS) -o $(BUILDDIR)/stackTest.o
 
-install : fcalc
-	cp $(BUILDDIR)/fcalc $(INSTDIR)
+install : LICENSE $(BUILDDIR)/fcalc
+	$(SH) ./install.sh "$(INSTDIR)" "$(LICENSEDIR)" "$(BUILDDIR)/fcalc" "LICENSE" 
+
 clean : 
 	rm -f $(EXE)
 	rm -f $(ALLOFILES)
