@@ -122,7 +122,6 @@ static int optToStack(int prec1, char *theOpt, LinkedList **operandStack, Linked
     return error;
 }
 
-//TODO: add error checking
 //place all current operands onto the equation queue stop if thair inside a pair of brackets
 static int insertOpts(LinkedList **equationQueue, LinkedList **operandStack)
 {
@@ -132,15 +131,34 @@ static int insertOpts(LinkedList **equationQueue, LinkedList **operandStack)
     {
         if(*((char*)((*operandStack)->data)) == '(')
         {
-            pop(operandStack);
+            //test if pop retruns a NULL pointer or not
+            void *testPtr = pop(operandStack);
+            if(testPtr == NULL)
+            {
+                ret = 1;
+                goto fail;
+            }
             stop++;
         }
         else
         {
             EquationElement *dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
+            if(dataTmp == NULL)
+            {
+                ret = 1;
+                goto fail;
+            }
+
             dataTmp->data.c = *((char*)pop(operandStack));
             dataTmp->type = symbol;
-            push(equationQueue, dataTmp);
+            if(dataTmp->data.c == NULL)
+            {
+                ret = 1;
+                goto fail;
+            }
+
+            ret = push(equationQueue, dataTmp);
+            if(ret) goto fail;
         }
     }
     fail:
@@ -421,6 +439,7 @@ double *processPostfixEqa(LinkedList *inQueue)
         tmpEle = pop(&processingStack);
         *resault = tmpEle->data.f;
         free(tmpEle);
+        tmpEle = NULL;
     }
     else { *resault = 0; } //set resault as error state
 
