@@ -53,6 +53,7 @@ int deleteList(LinkedList *lList)
     return ret;
 }
 
+//TODO: use the error checking now available
 int insertFirst(LinkedList **lList, void *inData)
 {
     int ret = 0;
@@ -63,14 +64,31 @@ int insertFirst(LinkedList **lList, void *inData)
         //copy the pointer from the lList
         ListNode *tmp = *lList;
         *lList = (ListNode*) malloc(sizeof(ListNode));
-        (*lList)->data = inData;
-        //set the previous head to the next of our new head
-        (*lList)->next = tmp;
+        if(*lList != NULL)
+        {
+            (*lList)->data = inData;
+            //set the previous head to the next of our new head
+            (*lList)->next = tmp;
+        }
+        //else we couldnt malloc
+        else
+        {
+            *lList = tmp;
+            ret = 1;
+        }
     }
     else
     {
+        ListNode *tmp = *lList;
         *lList = createList();
-        (*lList)->data = inData;
+        if(*lList != NULL)
+        {
+            (*lList)->data = inData;
+        }
+        else
+        {
+            *lList = tmp;
+        }
     }
     return ret;
 }

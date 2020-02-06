@@ -67,11 +67,12 @@ double calcUserAnswer(double first, char operand, double second)
 }
 
 //Evaluetes and inserts an operand into an operand queue
-static char *optToStack(int prec1, char *theOpt, LinkedList **operandStack, LinkedList **equationQueue)
+static int optToStack(int prec1, char *theOpt, LinkedList **operandStack, LinkedList **equationQueue)
 {
     /* stop stops the while loop when = 1
      * prec1 and prec2 are the precidence levels of both 
      * the operands we're currently looking at */
+    int error = 0;
     int stop = 0, prec2; //prec2 for the seccond op
     char opTmp;
     EquationElement *dataTmp;
@@ -93,29 +94,39 @@ static char *optToStack(int prec1, char *theOpt, LinkedList **operandStack, Link
             * but if we have a bracket act as if we are dealing with a new equation */
            if(prec1 > prec2 || opTmp == '(')
            {
-                push(operandStack, theOpt);
+                error = push(operandStack, theOpt);
+                if(error) goto fail;
                 stop++;
            }
            else //lower precidence
            {
                 dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
+                if(dataTmp == NULL) goto fail;
+
                 dataTmp->data.c = *((char*)pop(operandStack));
                 dataTmp->type = symbol;
-                push(equationQueue, dataTmp);
+                if(dataTmp->data.c == NULL) goto fail;
+
+                error = push(equationQueue, dataTmp);
+                if(error) goto fail;
            }
         }
         else //If we have nothing on the stack then the current operand automatically has the highest prescidence
         {
-            push(operandStack, theOpt);
+            error = push(operandStack, theOpt);
+            if(error) goto fail;
             stop++;
         }
     }
-    return 0;
+    fail:
+    return error;
 }
 
+//TODO: add error checking
 //place all current operands onto the equation queue stop if thair inside a pair of brackets
-static void insertOpts(LinkedList **equationQueue, LinkedList **operandStack)
+static int insertOpts(LinkedList **equationQueue, LinkedList **operandStack)
 {
+    int ret = 0;
     short stop = 0;
     while(*operandStack != NULL && stop == 0)
     {
@@ -132,6 +143,8 @@ static void insertOpts(LinkedList **equationQueue, LinkedList **operandStack)
             push(equationQueue, dataTmp);
         }
     }
+    fail:
+    return ret;
 }
 
 //This does manipulate the equation position
@@ -199,6 +212,7 @@ double parseNumber(char **equation)
 //convert string to postfix
 int processEquationStr(LinkedList **equationQueue, char *inEquation)
 {
+    int ret = 0;
     /* This array is for the cases when we need to insert extra chars into the
      * equation for example if we have a number then a bracket, this indicates
      * a maltiplication in this case we must add in the '*' char to the stack
@@ -231,34 +245,46 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
                         /* Add (0 - to the stack if there is nothing next to a zero
                          * not including a ')' */
                         //Add a '('
-                        optToStack(2, &addInRuleChars[1], &operandStack, equationQueue);
+                        ret = optToStack(2, &addInRuleChars[1], &operandStack, equationQueue);
+                        if(ret) goto fail;
 
                         //add a '0' to the equation queue
                         dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
+                        if(dataTmp == NULL)
+                        {
+                            ret = 1;
+                            goto fail;
+                        }
                         dataTmp->data.f = 0.0;
                         dataTmp->type = number;
-                        push(equationQueue, dataTmp);
+                        ret = push(equationQueue, dataTmp);
+                        if(ret) goto fail;
 
+                        //If we havent had an error
                         //add the '-'
-                        optToStack(1, equation, &operandStack, equationQueue);
+                        ret = optToStack(1, equation, &operandStack, equationQueue);
+                        if(ret) goto fail;
                         /* sets the flag that allows us to - when it comes to the
                          * next number - know when to add a ')' after the number */
                         zeroMinusBefore = true;
                     }
                     else
                     {
-                        optToStack(1, equation, &operandStack, equationQueue);
+                        ret = optToStack(1, equation, &operandStack, equationQueue);
+                        if(ret) goto fail;
                     }
                 }
                 else
                 {
-                    optToStack(1, equation, &operandStack, equationQueue);
+                    ret = optToStack(1, equation, &operandStack, equationQueue);
+                    if(ret) goto fail;
                 }
                 break;
 
             case '*': //same for * and /
             case '/':
-                optToStack(2, equation, &operandStack, equationQueue);
+                ret = optToStack(2, equation, &operandStack, equationQueue);
+                if(ret) goto fail;
                 break;
 
             /* This is just the start of a bracketed section so just
@@ -268,29 +294,38 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
                 {
                     /* addInRuleChars[0] is '*', thus we add a
                      * '*' between the num and the '(' */
-                    optToStack(2, &addInRuleChars[0], &operandStack, equationQueue);
+                    ret = optToStack(2, &addInRuleChars[0], &operandStack, equationQueue);
+                    if(ret) goto fail;
                 }
                 push(&operandStack, equation);
                 break;
 
            case ')':
-                insertOpts(equationQueue, &operandStack);
+                ret = insertOpts(equationQueue, &operandStack);
+                if(ret) goto fail;
                 
                 //if we have a number directly after the ')' we need to add '*'
                 if(*(equation+1) >= '0' && *(equation+1) <= '9')
                 {
                     /* addInRuleChars[0] is '*', thus we add a
                      * '*' between the num and the '(' */
-                    optToStack(2, &addInRuleChars[0], &operandStack, equationQueue);
+                    ret = optToStack(2, &addInRuleChars[0], &operandStack, equationQueue);
+                    if(ret) goto fail;
                 }
                 break;
             
            default: //If we just have a number
                 dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
+                if(dataTmp == NULL)
+                {
+                    ret = 1;
+                    goto fail;
+                }
                 //convert the char to int
                 dataTmp->data.f = parseNumber(&equation);
                 dataTmp->type = number;
-                push(equationQueue, dataTmp);
+                ret = push(equationQueue, dataTmp);
+                if(ret) goto fail;
                 
                 //If we had a '-' on it's own before this number
                 //The handling of a '-' by it's self, is done in the '-' section
@@ -298,7 +333,8 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
                 {
                     /* Emulate a ')' to close the bracket created if a '-' was
                      * found to be on it's own */
-                    insertOpts(equationQueue, &operandStack);
+                    ret = insertOpts(equationQueue, &operandStack);
+                    if(ret) goto fail;
                 }
                 break;
         }
@@ -308,9 +344,10 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
     }
 
     //Put the rest of the operands onto the stack
-    insertOpts(equationQueue, &operandStack);
+    ret = insertOpts(equationQueue, &operandStack);
 
-    return 0;
+    fail:
+    return ret;
 }
 
 //post fix to ans this should go to the current equations lists answer
