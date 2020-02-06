@@ -4,7 +4,4 @@ Things That are incomplete:
 
 * There is no support for the insertion of the ans from a previous equation
 
-* In main the main loop only runs once for testing and because the logic for
-    resetting has yet to be implimented
-
 * Create a function to check the input for errors
