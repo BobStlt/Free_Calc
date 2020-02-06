@@ -31,15 +31,21 @@ int deleteList(LinkedList *lList)
                 if(curr->data != NULL)
                 {
                     free(curr->data);
+                    curr->data = NULL;
                 }
                 lList = lList->next;
+                curr->next = NULL;
                 free(curr);
                 //go to the next element
                 curr = lList;
             }
         }
         //If we have data then remove it
-        if(lList->data != NULL) free(lList->data);
+        if(lList->data != NULL)
+        {
+            free(lList->data);
+            lList->data = NULL;
+        }
         //free the last element
         free(lList);
     }
@@ -127,22 +133,32 @@ void *deleteFirst(LinkedList **lList)
         LinkedList *toDel = *lList;
         *lList = (*lList)->next;
         free(toDel);
+        toDel = NULL; 
     }
     return ret;
 }
 
 //You need to free the returned data after use manually
+//Can delete the only element you have, we may want to change the args TODO
 void *deleteLast(LinkedList *lList)
 {
+    LinkedList *prevLList = lList;
     void *ret = NULL;
     if(lList != NULL)
     {
-       while(lList->next != NULL)
-       {
+        while(lList->next != NULL)
+        {
+            prevLList = lList;
             lList = lList->next;
-       }
-       ret = lList->data;
-       free(lList);
+        }
+        ret = lList->data;
+
+        //if there was not just one element in the list
+        if(lList != prevLList)
+        {
+            prevLList->next = NULL;
+        }
+        free(lList);
     }
     return ret;
 }
