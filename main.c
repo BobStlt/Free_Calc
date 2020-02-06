@@ -50,7 +50,7 @@ void outputPrgInfo(cmdflag flag)
             }
             fclose(license);
         }
-        else fprintf(stderr, "Sorry I could not show you the license.\n"
+        else perror("Sorry I could not show you the license.\n"
                      "It may be missing or may have been renamed\n");
    }
    //if we get a USEAGE flag or anthing else
@@ -65,6 +65,7 @@ void outputPrgInfo(cmdflag flag)
 
 int main(int argc, char **args)
 {
+    int returnVal = 0;
     /* This stores the elemets of our equation while and after the equation
      * string is processed by processEquationString
      * before the elements are processed by processPostfixEquation */
@@ -155,12 +156,24 @@ int main(int argc, char **args)
     //continuously get user input and calc the answer until they quit
     while(!exit)
     {
-        processEquationStr(&equationList, eqaStr);
+        exit = processEquationStr(&equationList, eqaStr);
+        if(exit)
+        {
+            perror("ERROR: could not process the equation string");
+            returnVal = 1;
+            break;
+        }
         ansPtr = processPostfixEqa(equationList);
         /* There is nothing on the stack but as the memory
          * is not cleared on free the stack logic thinks
          * there is still data. */
         equationList = NULL;
+        if(ansPtr == NULL)
+        {
+            perror("ERROR: could not process equation");
+            returnVal = 2;
+            break;
+        }
 
         printResault(ansPtr);
         //TODO: Before this should be freed we should keep it for insertion as ans
@@ -175,7 +188,8 @@ int main(int argc, char **args)
         }
     }
 
+    if(equationList != NULL) free(equationList);
     if(ansPtr != NULL) free(ansPtr);
     if(eqaStr != NULL) free(eqaStr);
-    return 0; //TODO: add a meaningfull return value
+    return returnVal; //TODO: add a meaningfull return value
 }

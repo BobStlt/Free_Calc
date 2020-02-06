@@ -10,6 +10,7 @@ void testInputValidity(char *eqaStr)
 
 }
 
+//TODO: add error checking
 void getUserEquation(char *eqaStr)
 {
     //clear the equation string so it can be reused
