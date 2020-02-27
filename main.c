@@ -89,12 +89,20 @@ int main(int argc, char **args)
             //if we have the indicator of a command flag
             if(**cmdArgs == '-')
             {
+                //capture what is after the '-'
+                char tmpCmdArg = ((*cmdArgs)+1);
                 //if we have "--" check for the seccond '-'
-                if(*(1+(*cmdArgs)) == '-')
+                if(tmpCmdArg == '-')
                 {
                     (*cmdArgs)++; //skip past the extra '-'
                 }
-                (*cmdArgs)++; //skip past the '-'
+                
+                //if we don't have a "--" nor simply have a negative number
+                if(tmpCmdArg < '0' &&
+                    tmpCmdArg > '9')
+                {
+                    (*cmdArgs)++; //skip past the first '-'
+                }
                 
                 //if we have a letter to denote a flag
                 if((**cmdArgs >= 'A' && **cmdArgs <= 'Z') ||
@@ -191,5 +199,5 @@ int main(int argc, char **args)
     if(equationList != NULL) free(equationList);
     if(ansPtr != NULL) free(ansPtr);
     if(eqaStr != NULL) free(eqaStr);
-    return returnVal; //TODO: add a meaningfull return value
-}
+    return returnVal; 
+    }
