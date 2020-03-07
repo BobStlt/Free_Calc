@@ -11,7 +11,8 @@
  * so as to allow a user to incoperate thair previous
  * answer into their next equation */
 
-//This is only used once so it is faster to make inline
+//Thease are only used once so it is faster to make them inline
+static inline int isLetter(char inElement);
 static inline double calcPower(double first, double second)
 //use the first variable so you can use a preveous resault
 {
@@ -105,7 +106,7 @@ static int optToStack(int prec1, char *theOpt, LinkedList **operandStack, Linked
 
                 dataTmp->data.c = *((char*)pop(operandStack));
                 dataTmp->type = symbol;
-                if(dataTmp->data.c == NULL) goto fail;
+                if(dataTmp->data.c == 0x00) goto fail;
 
                 error = push(equationQueue, dataTmp);
                 if(error) goto fail;
@@ -151,7 +152,7 @@ static int insertOpts(LinkedList **equationQueue, LinkedList **operandStack)
 
             dataTmp->data.c = *((char*)pop(operandStack));
             dataTmp->type = symbol;
-            if(dataTmp->data.c == NULL)
+            if(dataTmp->data.c == 0x00)
             {
                 ret = 1;
                 goto fail;
@@ -332,27 +333,35 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
                 }
                 break;
             
-           default: //If we just have a number
-                dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
-                if(dataTmp == NULL)
+           default: //If we have a number or something unexpected
+                if(isLetter(*equation))
+                {
+                    dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
+                    if(dataTmp == NULL)
+                    {
+                        ret = 1;
+                        goto fail;
+                    }
+                    //convert the char to int
+                    dataTmp->data.f = parseNumber(&equation);
+                    dataTmp->type = number;
+                    ret = push(equationQueue, dataTmp);
+                    if(ret) goto fail;
+                    
+                    //If we had a '-' on it's own before this number
+                    //The handling of a '-' by it's self, is done in the '-' section
+                    if(zeroMinusBefore)
+                    {
+                        /* Emulate a ')' to close the bracket created if a '-' was
+                         * found to be on it's own */
+                        ret = insertOpts(equationQueue, &operandStack);
+                        if(ret) goto fail;
+                    }
+                }
+                else
                 {
                     ret = 1;
                     goto fail;
-                }
-                //convert the char to int
-                dataTmp->data.f = parseNumber(&equation);
-                dataTmp->type = number;
-                ret = push(equationQueue, dataTmp);
-                if(ret) goto fail;
-                
-                //If we had a '-' on it's own before this number
-                //The handling of a '-' by it's self, is done in the '-' section
-                if(zeroMinusBefore)
-                {
-                    /* Emulate a ')' to close the bracket created if a '-' was
-                     * found to be on it's own */
-                    ret = insertOpts(equationQueue, &operandStack);
-                    if(ret) goto fail;
                 }
                 break;
         }
@@ -444,6 +453,15 @@ double *processPostfixEqa(LinkedList *inQueue)
     else { *resault = 0; } //set resault as error state
 
     return (resault); //the answer should be the only thing on the stack at this point
+}
+
+static inline int isLetter(char inElement)
+{
+    if(inElement >= '0' && inElement <= '9')
+    {
+        return 1;
+    }
+    else return 0;
 }
 
 inline int isEqaElement(char inElement)

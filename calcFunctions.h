@@ -42,4 +42,5 @@ double parseNumber(char **equation);
 
 int isEqaElement(char inElement);
 
+
 #endif

@@ -90,7 +90,7 @@ int main(int argc, char **args)
             if(**cmdArgs == '-')
             {
                 //capture what is after the '-'
-                char tmpCmdArg = ((*cmdArgs)+1);
+                char tmpCmdArg = *((*cmdArgs)+1);
                 //if we have "--" check for the seccond '-'
                 if(tmpCmdArg == '-')
                 {
@@ -200,4 +200,4 @@ int main(int argc, char **args)
     if(ansPtr != NULL) free(ansPtr);
     if(eqaStr != NULL) free(eqaStr);
     return returnVal; 
-    }
+}
