@@ -5,6 +5,8 @@
 #include "SingleLinkedList.h"
 #include "stack.h"
 
+#define isNumCharBefore(equation) ((*((equation)-1) >= '0') || (*((equation)-1) <= '9'))
+
 /* TODO:Add a 'unparse number' function and a function to allow
  * the replacement of the string 'ans' inside an equation
  * for use after at least one equation has been calculated
@@ -12,7 +14,6 @@
  * answer into their next equation */
 
 //Thease are only used once and are just helpers; make them static
-static int isNumber(char inElement);
 static int isAnsStr(char *equation);
 static int insertNum(double num, LinkedList **equationQueue);
 
@@ -236,7 +237,12 @@ double parseNumber(char **equation)
 }
 
 //convert string to postfix
-int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans)
+/* FIXME: Do proper error handling by checking weather there is a number after
+ * each symbol (there is no combination that is not an error state but has no
+ * number after the symbol)
+ * 
+ * Also fix the detection of non paired brackets*/
+int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
 {
     int ret = 0;
     /* This array is for the cases when we need to insert extra chars into the
@@ -247,7 +253,7 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans
      * when we have a '-' at the start of the line */
     static const char addInRuleChars[] = {'*', '(', ')', '0'};
     bool zeroMinusBefore = false;
-    char* equation = inEquation;
+    bool ansDetected = false;
     LinkedList *operandStack = NULL; //to hold our symbols while we work out thair ordering.
     //This is for wrighting our data to the equation queue if we're not using the optToStack func
     EquationElement *dataTmp;
@@ -261,18 +267,29 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans
                 /* This is to handle the case where we have a '-' not next to a number */
                 if(*equation == '-')
                 {
-                    /* If we are not past the start of the string or don't have
+                    //if we have a number or bracket
+                    bool normalSubOccurence =
+                        isNumCharBefore(equation) &&
+                        (*(equation-1) == ')');
+
+                    /* If we are past the start of the string or have
                      * a number before where the '-' is or what we have before
-                     * is not a ')' then we have nothing before our '-' */
-                    if((!pos) ||
-                        (((*(equation-1) < '0') || (*(equation-1) > '9')) &&
-                        (*(equation-1) != ')')))
+                     * is a ')' then we have something before our '-' */
+                    if((pos) || (ansDetected) || normalSubOccurence)
+                    {
+                        ret = optToStack(1, equation, &operandStack, equationQueue);
+                        ansDetected = false;
+                        if(ret)
+                            goto fail;
+                    }
+                    else
                     {
                         /* Add (0 - to the stack if there is nothing next to a zero
                          * not including a ')' */
                         //Add a '('
                         ret = optToStack(2, &addInRuleChars[1], &operandStack, equationQueue);
-                        if(ret) goto fail;
+                        if(ret)
+                            goto fail;
 
                         //add a '0' to the equation queue
                         dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
@@ -284,7 +301,8 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans
                         dataTmp->data.f = 0.0;
                         dataTmp->type = number;
                         ret = push(equationQueue, dataTmp);
-                        if(ret) goto fail;
+                        if(ret) 
+                            goto fail;
 
                         //If we havent had an error
                         //add the '-'
@@ -295,17 +313,11 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans
                          * next number - know when to add a ')' after the number */
                         zeroMinusBefore = true;
                     }
-                    else
-                    {
-                        ret = optToStack(1, equation, &operandStack, equationQueue);
-                        if(ret)
-                            goto fail;
-                    }
                 }
                 else
                 {
                     ret = optToStack(1, equation, &operandStack, equationQueue);
-                    if(ret)
+                    if((ret = (!pos || !isNumCharBefore(equation))) || ret)
                         goto fail;
                 }
                 break;
@@ -313,14 +325,14 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans
             case '*': //same for * and /
             case '/':
                 ret = optToStack(2, equation, &operandStack, equationQueue);
-                if(ret) 
+                if((ret = (!pos || !isNumCharBefore(equation))) || ret) 
                     goto fail;
                 break;
 
             /* This is just the start of a bracketed section so just
              * push it so we know for later */
            case '(': //if the previous char is a number then we are maltiplying
-                if(pos && (*(equation-1) >= '0' && *(equation-1) <= '9'))
+                if(pos && isNumCharBefore(equation))
                 {
                     /* addInRuleChars[0] is '*', thus we add a
                      * '*' between the num and the '(' */
@@ -333,7 +345,8 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans
 
            case ')':
                 ret = insertOpts(equationQueue, &operandStack);
-                if(ret) goto fail;
+                if(ret)
+                    goto fail;
                 
                 //if we have a number directly after the ')' we need to add '*'
                 if(*(equation+1) >= '0' && *(equation+1) <= '9')
@@ -372,6 +385,7 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans
                     //we need to insert ans
                     if(isAnsStr(equation) && (ans != NULL))
                     {
+                        ansDetected = true;
                         ret = insertNum(*ans, equationQueue);
                         //skip the 'a' and the 'n' but let the loop skip the 's'.
                         equation += 2;
@@ -467,23 +481,17 @@ double *processPostfixEqa(LinkedList *inQueue)
              * we already would have by poping it off the stack */
         }
         tmpEle = pop(&processingStack);
+        //the answer should be the only thing on the stack at this point
         *resault = tmpEle->data.f;
         free(tmpEle);
         tmpEle = NULL;
     }
     else { *resault = 0; } //set resault as error state
 
-    return (resault); //the answer should be the only thing on the stack at this point
+    return resault; 
 }
 
-static int isNumber(char inElement)
-{
-    if(inElement >= '0' && inElement <= '9')
-    {
-        return 1;
-    }
-    else return 0;
-}
+
 
 int isAnsStr(char *equation)
 {
@@ -493,7 +501,7 @@ int isAnsStr(char *equation)
     {
         if(strlen(equation) >= 3)
         {
-            for(int i; i < 3; i++)
+            for(int i = 0; i < 3; i++)
             {
                 if(isValid)
                 {
@@ -522,7 +530,7 @@ int isEqaElement(char inElement)
 {
     if((inElement == '(' ||
         inElement == ')') ||
-        (inElement >= '0' && inElement <= '9') ||
+        isNumber(inElement) ||
         inElement == '+' ||
         inElement == '*' ||
         inElement == '/')

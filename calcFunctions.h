@@ -5,7 +5,7 @@
 #include "stack.h"
 #include "SingleLinkedList.h"
 
-//Definitions of the functions in functions.c
+#define isNumber(numChar) ((numChar) >= '0' && (numChar) <= '9')
 
 typedef struct equationData
 {
