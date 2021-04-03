@@ -49,7 +49,9 @@ int deleteList(LinkedList *lList)
         //free the last element
         free(lList);
     }
-    else ret = 1;
+    else 
+        ret = 1;
+
     return ret;
 }
 
@@ -88,6 +90,7 @@ int insertFirst(LinkedList **lList, void *inData)
         else
         {
             *lList = tmp;
+            ret = 1;
         }
     }
     return ret;

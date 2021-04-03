@@ -159,7 +159,7 @@ double testProcessEquationStr(char *equation, double expectedRes)
 {
     double *tmpAns;
     LinkedList *equationQueue = NULL;
-    processEquationStr(&equationQueue, equation);
+    processEquationStr(&equationQueue, equation, NULL);
 	printf("This is what we have in the stack:\n");
 	printList(equationQueue, printListEle);
     tmpAns = processPostfixEqa(equationQueue);

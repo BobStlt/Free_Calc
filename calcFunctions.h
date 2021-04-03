@@ -30,7 +30,7 @@ typedef struct EquationElement
 double calcUserAnswer(double first, char operand, double second);
 
 //This takes a black list and your equation you want to convert into postfix
-int processEquationStr(LinkedList **equationQueue, char *inEquation);
+int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans);
 
 //This takes your converted post fix equaiton and returns the answer
 double *processPostfixEqa(LinkedList *questionQueue);

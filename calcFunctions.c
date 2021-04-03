@@ -11,9 +11,12 @@
  * so as to allow a user to incoperate thair previous
  * answer into their next equation */
 
-//Thease are only used once so it is faster to make them inline
-static inline int isLetter(char inElement);
-static inline double calcPower(double first, double second)
+//Thease are only used once and are just helpers; make them static
+static int isNumber(char inElement);
+static int isAnsStr(char *equation);
+static int insertNum(double num, LinkedList **equationQueue);
+
+static double calcPower(double first, double second)
 //use the first variable so you can use a preveous resault
 {
     long double ans = 1;
@@ -191,7 +194,10 @@ double parseNumber(char **equation)
                 //the ans moved up by a decimal place + the next value
                 ans = ans*10 + (**equation)-'0';
             }
-            if(firstRun) firstRun--;
+
+            if(firstRun)
+                firstRun--;
+
             (*equation)++;
         }
 
@@ -223,13 +229,14 @@ double parseNumber(char **equation)
                 *equation = numEnd;//place the equation processing pointer back at the end of the number
             }
         }
-        else (*equation)--; //put it back to the last digit so the processEquationString does not have to be changed
+        else 
+            (*equation)--; //put it back to the last digit so the processEquationString does not have to be changed
     }
     return (ans + subAns); //add the fractional part and the whole part together
 }
 
 //convert string to postfix
-int processEquationStr(LinkedList **equationQueue, char *inEquation)
+int processEquationStr(LinkedList **equationQueue, char *inEquation, double *ans)
 {
     int ret = 0;
     /* This array is for the cases when we need to insert extra chars into the
@@ -282,7 +289,8 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
                         //If we havent had an error
                         //add the '-'
                         ret = optToStack(1, equation, &operandStack, equationQueue);
-                        if(ret) goto fail;
+                        if(ret)
+                            goto fail;
                         /* sets the flag that allows us to - when it comes to the
                          * next number - know when to add a ')' after the number */
                         zeroMinusBefore = true;
@@ -290,20 +298,23 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
                     else
                     {
                         ret = optToStack(1, equation, &operandStack, equationQueue);
-                        if(ret) goto fail;
+                        if(ret)
+                            goto fail;
                     }
                 }
                 else
                 {
                     ret = optToStack(1, equation, &operandStack, equationQueue);
-                    if(ret) goto fail;
+                    if(ret)
+                        goto fail;
                 }
                 break;
 
             case '*': //same for * and /
             case '/':
                 ret = optToStack(2, equation, &operandStack, equationQueue);
-                if(ret) goto fail;
+                if(ret) 
+                    goto fail;
                 break;
 
             /* This is just the start of a bracketed section so just
@@ -314,7 +325,8 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
                     /* addInRuleChars[0] is '*', thus we add a
                      * '*' between the num and the '(' */
                     ret = optToStack(2, &addInRuleChars[0], &operandStack, equationQueue);
-                    if(ret) goto fail;
+                    if(ret)
+                        goto fail;
                 }
                 push(&operandStack, equation);
                 break;
@@ -329,39 +341,48 @@ int processEquationStr(LinkedList **equationQueue, char *inEquation)
                     /* addInRuleChars[0] is '*', thus we add a
                      * '*' between the num and the '(' */
                     ret = optToStack(2, &addInRuleChars[0], &operandStack, equationQueue);
-                    if(ret) goto fail;
+                    if(ret)
+                        goto fail;
                 }
                 break;
             
            default: //If we have a number or something unexpected
-                if(isLetter(*equation))
+                if(isNumber(*equation))
                 {
-                    dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
-                    if(dataTmp == NULL)
-                    {
-                        ret = 1;
-                        goto fail;
-                    }
                     //convert the char to int
-                    dataTmp->data.f = parseNumber(&equation);
-                    dataTmp->type = number;
-                    ret = push(equationQueue, dataTmp);
-                    if(ret) goto fail;
+                    double num = parseNumber(&equation);
+                    insertNum(num, equationQueue);
+                    if(ret) 
+                        goto fail;
                     
                     //If we had a '-' on it's own before this number
                     //The handling of a '-' by it's self, is done in the '-' section
+                    //TODO: check its not a bug to have this not clear this flag
                     if(zeroMinusBefore)
                     {
                         /* Emulate a ')' to close the bracket created if a '-' was
                          * found to be on it's own */
                         ret = insertOpts(equationQueue, &operandStack);
-                        if(ret) goto fail;
+                        if(ret)
+                            goto fail;
                     }
                 }
                 else
                 {
-                    ret = 1;
-                    goto fail;
+                    //we need to insert ans
+                    if(isAnsStr(equation) && (ans != NULL))
+                    {
+                        ret = insertNum(*ans, equationQueue);
+                        //skip the 'a' and the 'n' but let the loop skip the 's'.
+                        equation += 2;
+                        if(ret)
+                            goto fail;
+                    }
+                    else
+                    {
+                        ret = 1;
+                        goto fail;
+                    }
                 }
                 break;
         }
@@ -455,7 +476,7 @@ double *processPostfixEqa(LinkedList *inQueue)
     return (resault); //the answer should be the only thing on the stack at this point
 }
 
-static inline int isLetter(char inElement)
+static int isNumber(char inElement)
 {
     if(inElement >= '0' && inElement <= '9')
     {
@@ -464,7 +485,40 @@ static inline int isLetter(char inElement)
     else return 0;
 }
 
-inline int isEqaElement(char inElement)
+int isAnsStr(char *equation)
+{
+    int isValid = 1;
+    char *ansStr = "ans";
+    if(equation != NULL)
+    {
+        if(strlen(equation) >= 3)
+        {
+            for(int i; i < 3; i++)
+            {
+                if(isValid)
+                {
+                    //32 is the difference between the lower case and upper
+                    if(!((equation[i] == ansStr[i]) ||
+                        (equation[i] == (ansStr[i]) - 32)))
+                    {
+                        //letter is not correct
+                        isValid = 0;
+                    }
+                }
+                else
+                    break;
+            }
+        }
+        else
+            isValid = 0;
+    }
+    else
+        isValid = 0;
+
+    return isValid;
+}
+
+int isEqaElement(char inElement)
 {
     if((inElement == '(' ||
         inElement == ')') ||
@@ -475,5 +529,23 @@ inline int isEqaElement(char inElement)
     {
         return 1;
     }
-    else return 0;
+    else 
+        return 0;
+}
+
+int insertNum(double num, LinkedList **equationQueue)
+{
+    int success = 0;
+    if(equationQueue != NULL)
+    {
+        EquationElement* dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
+        if(dataTmp != NULL)
+        {
+            dataTmp->data.f = num;
+            dataTmp->type = number;
+            success = push(equationQueue, dataTmp);
+        }
+    }
+
+    return success;
 }

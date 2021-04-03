@@ -29,6 +29,8 @@
 #include "calcFunctions.h"
 #include "inputOutput.h"
 
+//TODO: mem leak when entering something starting with '+'
+
 typedef enum {USEAGE=1, LICENSE} cmdflag; //for storing which cmd flag has been selected
 
 const char *progName;
@@ -155,7 +157,7 @@ int main(int argc, char **args)
         //get the user equation string
         getUserEquation(eqaStr); 
         //If the user wants to quit
-        if(*eqaStr == 'q' || *eqaStr == 'Q')
+        if(isQuitString(eqaStr))
         {
             exit = true;
         }
@@ -164,36 +166,40 @@ int main(int argc, char **args)
     //continuously get user input and calc the answer until they quit
     while(!exit)
     {
-        exit = processEquationStr(&equationList, eqaStr);
-        if(exit)
+        returnVal = processEquationStr(&equationList, eqaStr, ansPtr);
+        if(returnVal)
         {
             perror("ERROR: could not process the equation string");
-            returnVal = 1;
-            break;
         }
-        ansPtr = processPostfixEqa(equationList);
-        /* There is nothing on the stack but as the memory
-         * is not cleared on free the stack logic thinks
-         * there is still data. */
-        equationList = NULL;
-        if(ansPtr == NULL)
+        else
         {
-            perror("ERROR: could not process equation");
-            returnVal = 2;
-            break;
+            ansPtr = processPostfixEqa(equationList);
+            /* There is nothing on the stack but as the memory
+            * is not cleared on free the stack logic thinks
+            * there is still data. */
+            equationList = NULL;
+            if(ansPtr == NULL)
+            {
+                perror("ERROR: could not process equation");
+                returnVal = 2;
+            }
         }
 
-        printResault(ansPtr);
-        //TODO: Before this should be freed we should keep it for insertion as ans
-        free(ansPtr);
-        ansPtr = NULL;
+        if(!returnVal)
+            printResault(ansPtr);
 
         getUserEquation(eqaStr);
         //If the user wants to quit
-        if(*eqaStr == 'q' || *eqaStr == 'Q')
+        if(isQuitString(eqaStr))
         {
             exit = true;
         }
+    }
+
+    if(ansPtr != NULL)
+    {
+        free(ansPtr);
+        ansPtr = NULL;
     }
 
     if(equationList != NULL) free(equationList);

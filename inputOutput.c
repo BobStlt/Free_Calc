@@ -5,9 +5,17 @@
 
 //TODO: impliment a find invalid strings / find exit condition
 //For testing weather the user input is valid
-void testInputValidity(char *eqaStr)
+int isValidEquation(char *eqaStr)
 {
 
+}
+
+int isQuitString(char *eqaStr)
+{
+    if(*eqaStr == 'q' || *eqaStr == 'Q')
+        return 1;
+    else
+        return 0;
 }
 
 //TODO: add error checking

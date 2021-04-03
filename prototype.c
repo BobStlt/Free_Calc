@@ -22,7 +22,7 @@ int main(int argc, char **args)
     }
     i++;
     inEquation[i] = '\0';
-    processEquationStr(&equationList, inEquation);
+    processEquationStr(&equationList, inEquation, NULL);
     printList(equationList, printListEle);
     double *ans;
     ans = processPostfixEqa(equationList);
