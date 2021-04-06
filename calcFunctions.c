@@ -261,7 +261,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
     //This is for wrighting our data to the equation queue if we're not using the optToStack func
     EquationElement *dataTmp;
     int pos = 0;
-    while(*equation != '\0')
+    while(ret || *equation != '\0')
     {
         switch(*equation)
         {
@@ -283,7 +283,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                         ret = optToStack(1, equation, &operandStack, equationQueue);
                         ansDetected = false;
                         if(ret)
-                            goto fail;
+                            break;
                     }
                     else
                     {
@@ -292,26 +292,26 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                         //Add a '('
                         ret = optToStack(2, &addInRuleChars[1], &operandStack, equationQueue);
                         if(ret)
-                            goto fail;
+                            break;
 
                         //add a '0' to the equation queue
                         dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
                         if(dataTmp == NULL)
                         {
                             ret = 1;
-                            goto fail;
+                            break;
                         }
                         dataTmp->data.f = 0.0;
                         dataTmp->type = number;
                         ret = push(equationQueue, dataTmp);
                         if(ret) 
-                            goto fail;
+                            break;
 
                         //If we havent had an error
                         //add the '-'
                         ret = optToStack(1, equation, &operandStack, equationQueue);
                         if(ret)
-                            goto fail;
+                            break;
                         /* sets the flag that allows us to - when it comes to the
                          * next number - know when to add a ')' after the number */
                         zeroMinusBefore = true;
@@ -321,7 +321,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                 {
                     ret = optToStack(1, equation, &operandStack, equationQueue);
                     if((ret = (!pos || !isNumCharBefore(equation))) || ret)
-                        goto fail;
+                        break;
                 }
                 break;
 
@@ -329,7 +329,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
             case '/':
                 ret = optToStack(2, equation, &operandStack, equationQueue);
                 if((ret = (!pos || !isNumCharBefore(equation))) || ret) 
-                    goto fail;
+                    break;
                 break;
 
             /* This is just the start of a bracketed section so just
@@ -341,7 +341,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                      * '*' between the num and the '(' */
                     ret = optToStack(2, &addInRuleChars[0], &operandStack, equationQueue);
                     if(ret)
-                        goto fail;
+                        break;
                 }
                 push(&operandStack, equation);
                 break;
@@ -349,7 +349,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
            case ')':
                 ret = insertOpts(equationQueue, &operandStack);
                 if(ret)
-                    goto fail;
+                    break;
                 
                 //if we have a number directly after the ')' we need to add '*'
                 if(isdigit(*(equation+1)))
@@ -357,8 +357,6 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                     /* addInRuleChars[0] is '*', thus we add a
                      * '*' between the num and the '(' */
                     ret = optToStack(2, &addInRuleChars[0], &operandStack, equationQueue);
-                    if(ret)
-                        goto fail;
                 }
                 break;
             
@@ -369,7 +367,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                     double num = parseNumber(&equation);
                     insertNum(num, equationQueue);
                     if(ret) 
-                        goto fail;
+                        break;
                     
                     //If we had a '-' on it's own before this number
                     //The handling of a '-' by it's self, is done in the '-' section
@@ -380,7 +378,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                          * found to be on it's own */
                         ret = insertOpts(equationQueue, &operandStack);
                         if(ret)
-                            goto fail;
+                            break;
                     }
                 }
                 else
@@ -393,12 +391,12 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                         //skip the 'a' and the 'n' but let the loop skip the 's'.
                         equation += 2;
                         if(ret)
-                            goto fail;
+                            break;
                     }
                     else
                     {
                         ret = 1;
-                        goto fail;
+                        break;
                     }
                 }
                 break;
@@ -411,7 +409,6 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
     //Put the rest of the operands onto the stack
     ret = insertOpts(equationQueue, &operandStack);
 
-    fail:
     return ret;
 }
 
