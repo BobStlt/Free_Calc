@@ -128,6 +128,7 @@ int main(int argc, char **args)
             }
             //if we have a number or symbol as the first item in the string we have an equation element so we add it
             //we have to use 39 to represent ' as ''' isn't recognised by gcc
+            //TODO: change 39 to '/'' and test
             else if(isEqaElement(**cmdArgs) && (**cmdArgs != (char) 39)) 
             {
                 if(eqaStr == NULL)
@@ -160,14 +161,20 @@ int main(int argc, char **args)
             exit = true;
         }
     }
+
+    /* currRetVal stores the return value for the current iteration for the
+     * event loop that way it isnt cleared whenever a new loop starts*/
+    int currRetVal = 0;
     
     //continuously get user input and calc the answer until they quit
     while(!exit)
     {
-        returnVal = processEquationStr(&equationList, eqaStr, ansPtr);
-        if(returnVal)
+        currRetVal = processEquationStr(&equationList, eqaStr, ansPtr);
+
+        if(currRetVal)
         {
             perror("ERROR: could not process the equation string");
+            returnVal = currRetVal;
         }
         else
         {
@@ -183,7 +190,7 @@ int main(int argc, char **args)
             }
         }
 
-        if(!returnVal)
+        if(!currRetVal)
             printResault(ansPtr);
 
         getUserEquation(eqaStr);
