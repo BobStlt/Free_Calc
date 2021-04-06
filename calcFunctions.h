@@ -5,8 +5,6 @@
 #include "stack.h"
 #include "SingleLinkedList.h"
 
-#define isNumber(numChar) ((numChar) >= '0' && (numChar) <= '9')
-
 typedef struct equationData
 {
     char *originalQuestion;

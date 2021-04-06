@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include "SingleLinkedList.h"
@@ -79,7 +80,6 @@ int main(int argc, char **args)
     progName = args[0]; //save the progam name as a global variable
 
 
-
     if(argc >= 2)
     {
         char **cmdArgs = args;
@@ -100,15 +100,13 @@ int main(int argc, char **args)
                 }
                 
                 //if we don't have a "--" nor simply have a negative number
-                if(tmpCmdArg < '0' &&
-                    tmpCmdArg > '9')
+                if(!isdigit(tmpCmdArg))
                 {
                     (*cmdArgs)++; //skip past the first '-'
                 }
                 
                 //if we have a letter to denote a flag
-                if((**cmdArgs >= 'A' && **cmdArgs <= 'Z') ||
-                    (**cmdArgs >= 'a' && **cmdArgs <= 'z'))
+                if(isalpha(**cmdArgs))
                 {
                     char tmpFlag = **cmdArgs;
                     if(tmpFlag == 'l')

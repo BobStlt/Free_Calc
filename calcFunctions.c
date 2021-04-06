@@ -1,11 +1,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 #include "calcFunctions.h"
 #include "SingleLinkedList.h"
 #include "stack.h"
 
-#define isNumCharBefore(equation) ((*((equation)-1) >= '0') || (*((equation)-1) <= '9'))
+#define isNumCharBefore(equation) (isdigit(*((equation)-1)))
 
 /* TODO:Add a 'unparse number' function and a function to allow
  * the replacement of the string 'ans' inside an equation
@@ -183,7 +184,7 @@ double parseNumber(char **equation)
     if(*equation != NULL)
     {
         //Parse numbers before the desimal point
-        while((char)**equation >= '0' && (char)**equation <= '9')
+        while(isdigit((char)**equation))
         {
             if(firstRun)
             {
@@ -208,10 +209,10 @@ double parseNumber(char **equation)
             (*equation)++; //move past the desimal point
 
             //If we had notheing after the desimal place then do nothing
-            if((char)**equation >= '0' && (char)**equation <= '9')
+            if(isdigit((char)**equation))
             {
                 //then after the desimal point
-                while((char)**equation >= '0' && (char)**equation <= '9')
+                while(isdigit((char)**equation))
                 {
                     numDecPlaces++;
                     (*equation)++;
@@ -241,7 +242,9 @@ double parseNumber(char **equation)
  * each symbol (there is no combination that is not an error state but has no
  * number after the symbol)
  * 
- * Also fix the detection of non paired brackets*/
+ * Also fix the detection of non paired brackets and
+ * recression in parsing an adition after ans or brackets 
+ * e.g failure to parse 20(6)+1*/
 int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
 {
     int ret = 0;
@@ -349,7 +352,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                     goto fail;
                 
                 //if we have a number directly after the ')' we need to add '*'
-                if(*(equation+1) >= '0' && *(equation+1) <= '9')
+                if(isdigit(*(equation+1)))
                 {
                     /* addInRuleChars[0] is '*', thus we add a
                      * '*' between the num and the '(' */
@@ -360,7 +363,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                 break;
             
            default: //If we have a number or something unexpected
-                if(isNumber(*equation))
+                if(isdigit(*equation))
                 {
                     //convert the char to int
                     double num = parseNumber(&equation);
@@ -530,7 +533,7 @@ int isEqaElement(char inElement)
 {
     if((inElement == '(' ||
         inElement == ')') ||
-        isNumber(inElement) ||
+        isdigit(inElement) ||
         inElement == '+' ||
         inElement == '*' ||
         inElement == '/')
