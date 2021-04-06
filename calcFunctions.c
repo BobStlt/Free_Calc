@@ -82,7 +82,7 @@ static int optToStack(int prec1, char *theOpt, LinkedList **operandStack, Linked
     int stop = 0, prec2; //prec2 for the seccond op
     char opTmp;
     EquationElement *dataTmp;
-    while(error || stop != 1)
+    while(!error && stop != 1)
     {
         if(*operandStack != NULL)
         {
@@ -265,7 +265,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
     //This is for wrighting our data to the equation queue if we're not using the optToStack func
     EquationElement *dataTmp;
     int pos = 0;
-    while(ret || *equation != '\0')
+    while(!ret && *equation != '\0')
     {
         switch(*equation)
         {
@@ -324,16 +324,14 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                 else
                 {
                     ret = optToStack(1, equation, &operandStack, equationQueue);
-                    if((ret = (!pos || !isNumCharBefore(equation))) || ret)
-                        break;
+                    ret = (!pos || !isNumCharBefore(equation)) ? 1 : ret;
                 }
                 break;
 
             case '*': //same for * and /
             case '/':
                 ret = optToStack(2, equation, &operandStack, equationQueue);
-                if((ret = (!pos || !isNumCharBefore(equation))) || ret) 
-                    break;
+                ret = (!pos || !isNumCharBefore(equation)) ? 1 : ret;
                 break;
 
             /* This is just the start of a bracketed section so just

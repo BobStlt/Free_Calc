@@ -5,10 +5,10 @@
 
 //TODO: impliment a find invalid strings / find exit condition
 //For testing weather the user input is valid
-int isValidEquation(char *eqaStr)
+/*int isValidEquation(char *eqaStr)
 {
 
-}
+}*/
 
 int isQuitString(char *eqaStr)
 {

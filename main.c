@@ -128,7 +128,7 @@ int main(int argc, char **args)
             }
             //if we have a number or symbol as the first item in the string we have an equation element so we add it
             //we have to use 39 to represent ' as ''' isn't recognised by gcc
-            //TODO: change 39 to '/'' and test
+            //TODO: change 39 to '\'' and test
             else if(isEqaElement(**cmdArgs) && (**cmdArgs != (char) 39)) 
             {
                 if(eqaStr == NULL)
