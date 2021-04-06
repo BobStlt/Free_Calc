@@ -82,7 +82,7 @@ static int optToStack(int prec1, char *theOpt, LinkedList **operandStack, Linked
     int stop = 0, prec2; //prec2 for the seccond op
     char opTmp;
     EquationElement *dataTmp;
-    while(stop != 1)
+    while(error || stop != 1)
     {
         if(*operandStack != NULL)
         {
@@ -101,30 +101,34 @@ static int optToStack(int prec1, char *theOpt, LinkedList **operandStack, Linked
            if(prec1 > prec2 || opTmp == '(')
            {
                 error = push(operandStack, theOpt);
-                if(error) goto fail;
                 stop++;
            }
            else //lower precidence
            {
                 dataTmp = (EquationElement*)malloc(sizeof(EquationElement));
-                if(dataTmp == NULL) goto fail;
+                if(dataTmp != NULL)
+                {
+                    dataTmp->data.c = *((char*)pop(operandStack));
+                    dataTmp->type = symbol;
+                    if(dataTmp->data.c != 0x00)
+                    {
+                        error = 2;
+                        break;
+                    }
 
-                dataTmp->data.c = *((char*)pop(operandStack));
-                dataTmp->type = symbol;
-                if(dataTmp->data.c == 0x00) goto fail;
-
-                error = push(equationQueue, dataTmp);
-                if(error) goto fail;
+                    error = push(equationQueue, dataTmp);
+                }
+                else
+                    error = 3;
            }
         }
         else //If we have nothing on the stack then the current operand automatically has the highest prescidence
         {
             error = push(operandStack, theOpt);
-            if(error) goto fail;
             stop++;
         }
     }
-    fail:
+
     return error;
 }
 
