@@ -277,9 +277,13 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                 if(*equation == '-')
                 {
                     //if we have a number or bracket
-                    bool normalSubOccurence =
-                        isNumCharBefore(equation) &&
-                        (*(equation-1) == ')');
+                    bool normalSubOccurence;
+                    if(eqaPos)
+                    {
+                        normalSubOccurence =
+                            isNumCharBefore(equation) &&
+                            (*(equation-1) == ')');
+                    }
 
                     /* If we are past the start of the string or have
                      * a number before where the '-' is or what we have before
