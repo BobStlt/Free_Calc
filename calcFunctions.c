@@ -264,7 +264,9 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
     LinkedList *operandStack = NULL; //to hold our symbols while we work out thair ordering.
     //This is for wrighting our data to the equation queue if we're not using the optToStack func
     EquationElement *dataTmp;
-    int pos = 0;
+    /* The possion in the equation string (used for detection of weather were at
+     * the start of the string) */
+    int eqaPos = 0;
     while(!ret && *equation != '\0')
     {
         switch(*equation)
@@ -282,7 +284,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                     /* If we are past the start of the string or have
                      * a number before where the '-' is or what we have before
                      * is a ')' then we have something before our '-' */
-                    if((pos) || (ansDetected) || normalSubOccurence)
+                    if((eqaPos) || (ansDetected) || normalSubOccurence)
                     {
                         ret = optToStack(1, equation, &operandStack, equationQueue);
                         ansDetected = false;
@@ -324,20 +326,20 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                 else
                 {
                     ret = optToStack(1, equation, &operandStack, equationQueue);
-                    ret = (!pos || !isNumCharBefore(equation)) ? 1 : ret;
+                    ret = (!eqaPos || !isNumCharBefore(equation)) ? 1 : ret;
                 }
                 break;
 
             case '*': //same for * and /
             case '/':
                 ret = optToStack(2, equation, &operandStack, equationQueue);
-                ret = (!pos || !isNumCharBefore(equation)) ? 1 : ret;
+                ret = (!eqaPos || !isNumCharBefore(equation)) ? 1 : ret;
                 break;
 
             /* This is just the start of a bracketed section so just
              * push it so we know for later */
            case '(': //if the previous char is a number then we are maltiplying
-                if(pos && isNumCharBefore(equation))
+                if(eqaPos && isNumCharBefore(equation))
                 {
                     /* addInRuleChars[0] is '*', thus we add a
                      * '*' between the num and the '(' */
@@ -405,11 +407,13 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
         }
         equation++; //set the pointer to the charactor ready for the next iteration
         //if the first pass has just ended set the firstChar flag to false
-        pos++;
+        eqaPos++;
     }
 
-    //Put the rest of the operands onto the stack
-    ret = insertOpts(equationQueue, &operandStack);
+    //Put the rest of the operands onto the stack only if there is no error
+    //TODO: fix memeory leak (it might actuall be caused elseware)
+    if(!ret)
+        ret = insertOpts(equationQueue, &operandStack);
 
     return ret;
 }
