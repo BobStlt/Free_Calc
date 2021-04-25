@@ -173,7 +173,7 @@ int main(int argc, char **args)
 
         if(currRetVal)
         {
-            perror("ERROR: could not process the equation string");
+            fprintf(stderr, "ERROR: could not process the equation string\n");
             returnVal = currRetVal;
         }
         else
