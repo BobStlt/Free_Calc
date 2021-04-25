@@ -185,7 +185,7 @@ int main(int argc, char **args)
             equationList = NULL;
             if(ansPtr == NULL)
             {
-                perror("ERROR: could not process equation");
+                fprintf(stderr, "ERROR: could not process equation");
                 returnVal = 2;
             }
         }
