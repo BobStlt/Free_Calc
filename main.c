@@ -178,7 +178,17 @@ int main(int argc, char **args)
         }
         else
         {
+            double *lastPtr = ansPtr;
             ansPtr = processPostfixEqa(equationList);
+            /* The last equations data may have been used in the processing of
+             * the equation so we cant delete it until we finish making the
+             * calculation. */
+            if(lastPtr != NULL) 
+            {
+                free(lastPtr);
+                lastPtr = NULL;
+            }
+
             /* There is nothing on the stack but as the memory
             * is not cleared on free the stack logic thinks
             * there is still data. */
