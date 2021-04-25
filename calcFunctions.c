@@ -17,6 +17,7 @@
 //Thease are only used once and are just helpers; make them static
 static int isAnsStr(char *equation);
 static int insertNum(double num, LinkedList **equationQueue);
+static int validOptPos(char *currEqaPos, char *origEqaPos);
 
 static double calcPower(double first, double second)
 //use the first variable so you can use a preveous resault
@@ -110,7 +111,8 @@ static int optToStack(int prec1, char *theOpt, LinkedList **operandStack, Linked
                 {
                     dataTmp->data.c = *((char*)pop(operandStack));
                     dataTmp->type = symbol;
-                    if(dataTmp->data.c != 0x00)
+
+                    if(dataTmp->data.c == 0x00)
                     {
                         error = 2;
                         break;
@@ -241,14 +243,10 @@ double parseNumber(char **equation)
     return (ans + subAns); //add the fractional part and the whole part together
 }
 
-//convert string to postfix
-/* FIXME: Do proper error handling by checking weather there is a number after
- * each symbol (there is no combination that is not an error state but has no
- * number after the symbol)
- * 
- * Also fix the detection of non paired brackets and
- * recression in parsing an adition after ans or brackets 
- * e.g failure to parse 20(6)+1*/
+//converts string to postfix
+/* TODO: refactor this whole function making using a struct to hold the state
+ * so it can be passed to functions that work on the processing */
+//TODO: fix memeory leak (it might actuall be caused elseware)
 int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
 {
     int ret = 0;
@@ -261,6 +259,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
     static const char addInRuleChars[] = {'*', '(', ')', '0'};
     bool zeroMinusBefore = false;
     bool ansDetected = false;
+    char *origEquationPos = equation;
     LinkedList *operandStack = NULL; //to hold our symbols while we work out thair ordering.
     //This is for wrighting our data to the equation queue if we're not using the optToStack func
     EquationElement *dataTmp;
@@ -277,7 +276,7 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                 if(*equation == '-')
                 {
                     //if we have a number or bracket
-                    bool normalSubOccurence;
+                    bool normalSubOccurence = false;
                     if(eqaPos)
                     {
                         normalSubOccurence =
@@ -287,7 +286,8 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
 
                     /* If we are past the start of the string or have
                      * a number before where the '-' is or what we have before
-                     * is a ')' then we have something before our '-' */
+                     * is a ')' or we have an ans before then what we have
+                     * before our '-' is valid */
                     if((eqaPos) || (ansDetected) || normalSubOccurence)
                     {
                         ret = optToStack(1, equation, &operandStack, equationQueue);
@@ -330,14 +330,16 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
                 else
                 {
                     ret = optToStack(1, equation, &operandStack, equationQueue);
-                    ret = (!eqaPos || !isNumCharBefore(equation)) ? 1 : ret;
+                    ret = (!eqaPos || !validOptPos(equation, origEquationPos))
+                           ? 1 : ret;
                 }
                 break;
 
             case '*': //same for * and /
             case '/':
                 ret = optToStack(2, equation, &operandStack, equationQueue);
-                ret = (!eqaPos || !isNumCharBefore(equation)) ? 1 : ret;
+                ret = (!eqaPos || !validOptPos(equation, origEquationPos))
+                        ? 1 : ret;
                 break;
 
             /* This is just the start of a bracketed section so just
@@ -415,7 +417,6 @@ int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
     }
 
     //Put the rest of the operands onto the stack only if there is no error
-    //TODO: fix memeory leak (it might actuall be caused elseware)
     if(!ret)
         ret = insertOpts(equationQueue, &operandStack);
 
@@ -566,4 +567,30 @@ int insertNum(double num, LinkedList **equationQueue)
     }
 
     return success;
+}
+
+int validOptPos(char *currEqaPos, char *origEqaPos)
+{
+    int ret;
+    int pos = currEqaPos - origEqaPos;
+    /* we need to check the char before. If we are already at the start of the
+     * string then thats not our memory */
+    if(pos >= 1)
+    {
+        char charBefore = *(currEqaPos-1);
+        if(charBefore != '(')
+        {
+            ret = 1;
+        }
+        else if((charBefore != 's') && (pos >= 3)) //the 's' in "ans" + our opt
+        {
+            ret = 1;
+        }
+        else if(isNumCharBefore(currEqaPos))
+        {
+            ret = 1;
+        }
+    }
+    else
+        ret = 0;
 }
