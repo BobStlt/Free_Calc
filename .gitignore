@@ -1,3 +1,4 @@
 #Hide contence of the build folder and other files that arnt part of the codebase
 Build/*
 .vscode
+gmon.out
