@@ -173,19 +173,29 @@ int main(int argc, char **args)
 
         if(currRetVal)
         {
-            perror("ERROR: could not process the equation string");
+            fprintf(stderr, "ERROR: could not process the equation string\n");
             returnVal = currRetVal;
         }
         else
         {
+            double *lastPtr = ansPtr;
             ansPtr = processPostfixEqa(equationList);
+            /* The last equations data may have been used in the processing of
+             * the equation so we cant delete it until we finish making the
+             * calculation. */
+            if(lastPtr != NULL) 
+            {
+                free(lastPtr);
+                lastPtr = NULL;
+            }
+
             /* There is nothing on the stack but as the memory
             * is not cleared on free the stack logic thinks
             * there is still data. */
             equationList = NULL;
             if(ansPtr == NULL)
             {
-                perror("ERROR: could not process equation");
+                fprintf(stderr, "ERROR: could not process equation");
                 returnVal = 2;
             }
         }
