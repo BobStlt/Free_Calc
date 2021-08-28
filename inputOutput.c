@@ -25,6 +25,8 @@ int isQuitString(char *eqaStr)
 // TODO: add error checking
 void getUserEquation(char *eqaStr)
 {
+    char *eqaStrBegining = eqaStr;
+
     // clear the equation string so it can be reused
     memset(eqaStr, 0, EQUATION_STR_LEN);
 
@@ -43,9 +45,11 @@ void getUserEquation(char *eqaStr)
         else if (tmpChar == EOF)
         {
             // fake a quit command at the start of the string
-            *eqaStr = 'q';
+            *eqaStrBegining = 'q';
             eqaStr++;
-            // Fake a return key press
+            // fake a return key press
+            puts("");
+            break;
         }
 
         if (tmpChar != ' ') // Ignore spaces
