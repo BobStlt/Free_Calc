@@ -30,13 +30,35 @@
 #include "calcFunctions.h"
 #include "inputOutput.h"
 
-//TODO: mem leak when entering something starting with '+'
+typedef struct {
+    const int          pArgc;
+    const char** const pArgs;
+    const char*  const progName;
+} prog_info_t;
+
+typedef struct{
+    bool  quit;
+    char* eqa;
+} chp_or_done;
 
 typedef enum {USEAGE=1, LICENSE} cmdflag; //for storing which cmd flag has been selected
 
-const char *progName;
+prog_info_t processCmdArgs(int argc, char **args)
+{
+    const char *progName = *args;
+    const int pArgc = argc-1;
+    const char ** const pArgs = args+1;
 
-void outputPrgInfo(cmdflag flag)
+    prog_info_t ret = {
+        pArgc,
+        pArgs,
+        progName
+    };
+
+    return ret;
+}
+
+void outputPrgInfo(cmdflag flag, const char *const progName)
 //For outputting license and help info
 {
    if(flag == LICENSE)
@@ -66,6 +88,110 @@ void outputPrgInfo(cmdflag flag)
    }
 }
 
+/* Takes the cmd line args and processes them.
+ * We either output the infomation requested or return a processed a equation line. */
+chp_or_done handleArgs(int argc, char **args)
+{
+    prog_info_t processedArgs = processCmdArgs(argc, args);
+    char *eqaStr = NULL; //The string containing equation the user entered
+    if(processedArgs.pArgc >= 1)
+    {
+        char ** const cmdArgs = processedArgs.pArgs;
+        //parse cmd args, we only scan the start of each of the entered strings for flags.
+        //TODO: if your add support for - to denote a negative number remember your equations could start with '-'
+        for(int i = 0; i < processedArgs.pArgc; i++)
+        {
+            char * currArg = processedArgs.pArgs[i];
+            //if we have the indicator of a command flag
+            if(*currArg == '-')
+            {
+                //capture what is after the '-'
+                char tmpCmdArg = *((currArg)+1);
+                //if we have "--" check for the seccond '-'
+                if(tmpCmdArg == '-')
+                {
+                    currArg++; //skip past the extra '-'
+                }
+                
+                //if we don't have a "--" nor simply have a negative number
+                if(!isdigit(tmpCmdArg))
+                {
+                    currArg++; //skip past the first '-'
+                }
+                
+                //if we have a letter to denote a flag
+                if(isalpha(*currArg))
+                {
+                    char tmpFlag = *currArg;
+                    if(tmpFlag == 'l')
+                    {
+                        tmpFlag -= (char) 32; //make the flag an 'L' so we test true below
+                    }
+                    //if we have an 'L' we + the defference between 'L' and 'l'
+                    if(tmpFlag + 32 == 'l')
+                    {
+                        //If we have an l flag print out the license
+                        outputPrgInfo(LICENSE, processedArgs.progName);
+                        if (eqaStr == NULL)
+                            break;
+                        else {
+                            free(eqaStr);
+                            eqaStr = NULL;
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        outputPrgInfo(USEAGE, processedArgs.progName); //If we get a bad flag or a 'u' flag to denote useage print the useage
+                        if (eqaStr == NULL)
+                            break;
+                        else {
+                            free(eqaStr);
+                            eqaStr = NULL;
+                            break;
+                        }
+                    }
+                }
+            }
+            //if we have a number or symbol as the first item in the string we have an equation element so we add it
+            else if(isEqaElement(*currArg) && (*currArg != (char) '\''))
+            {
+                if(eqaStr == NULL)
+                {
+                    //Set the last to delimit the end of the strin
+                    eqaStr = (char*) malloc(EQUATION_STR_SIZE*sizeof(char));
+                    eqaStr[EQUATION_STR_SIZE] = '\0';
+                }
+                strncat(eqaStr, currArg, EQUATION_STR_SIZE-1);
+            }
+            else
+            {
+                outputPrgInfo(USEAGE, processedArgs.progName); //tell the user what the cmd args are for and how to use the program
+                if (eqaStr == NULL)
+                    break;
+                else {
+                    free(eqaStr);
+                    eqaStr = NULL;
+                    break;
+                }
+            }
+        }
+    }
+
+    //default to quit
+    chp_or_done ret = { 1, NULL };
+    if (eqaStr != NULL)
+    {
+        ret.quit = 0;
+        ret.eqa = eqaStr;
+    }
+    else if (!processedArgs.pArgc) {
+        //if there where no args don't quit
+        ret.quit = 0;
+    }
+    return ret;
+}
+
 int main(int argc, char **args)
 {
     int returnVal = 0;
@@ -74,151 +200,88 @@ int main(int argc, char **args)
      * before the elements are processed by processPostfixEquation */
     //a linked list with all the parsed elements of the equation the user entered
     LinkedList *equationList = NULL;    
-    char *eqaStr = NULL; //The string containing equation the user entered
     double *ansPtr = NULL; //Our answer is returned as a pointer, so we can reuse it in other equations
     int exit = 0;
-    progName = args[0]; //save the progam name as a global variable
+    chp_or_done quitOrProcess = handleArgs(argc, args); //The string containing equation the user entered
+    char *eqaStr = NULL;
 
 
-    if(argc >= 2)
+    if (!quitOrProcess.quit)
     {
-        char **cmdArgs = args;
-        cmdArgs++; //skip over the prog name
-        //parse cmd args, we only scan the start of each of the entered strings for flags.
-        //TODO: if your add support for - to denote a negative number remember your equations could start with '-'
-        for(int i = 0; i < argc-1; i++) //we start at 0 as we already skipped the prog name
+        eqaStr = quitOrProcess.eqa;
+        //if we didn't have any args or didn't parse any equation from the args
+        if(eqaStr == NULL)
         {
-            //if we have the indicator of a command flag
-            if(**cmdArgs == '-')
+            //Set the last to delimit the end of the strin
+            eqaStr = (char*) malloc(EQUATION_STR_SIZE*sizeof(char));
+            //get the user equation string
+            getUserEquation(eqaStr);
+            //If the user wants to quit
+            if(isQuitString(eqaStr))
             {
-                //capture what is after the '-'
-                char tmpCmdArg = *((*cmdArgs)+1);
-                //if we have "--" check for the seccond '-'
-                if(tmpCmdArg == '-')
-                {
-                    (*cmdArgs)++; //skip past the extra '-'
-                }
-                
-                //if we don't have a "--" nor simply have a negative number
-                if(!isdigit(tmpCmdArg))
-                {
-                    (*cmdArgs)++; //skip past the first '-'
-                }
-                
-                //if we have a letter to denote a flag
-                if(isalpha(**cmdArgs))
-                {
-                    char tmpFlag = **cmdArgs;
-                    if(tmpFlag == 'l')
-                    {
-                        tmpFlag -= (char) 32; //make the flag an 'L' so we test true below
-                    }
-                    //if we have an 'L' we + the defference between 'L' and 'l'
-                    if(tmpFlag + 32 == 'l')
-                    {
-                        outputPrgInfo(LICENSE); //If we have an l flag print out the license
-                        return 0;
-                    }
-                    else
-                    {
-                        outputPrgInfo(USEAGE); //If we get a bad flag or a 'u' flag to denote useage print the useage
-                        return 0;
-                    }
-                }
+                exit = true;
             }
-            //if we have a number or symbol as the first item in the string we have an equation element so we add it
-            //we have to use 39 to represent ' as ''' isn't recognised by gcc
-            //TODO: change 39 to '\'' and test
-            else if(isEqaElement(**cmdArgs) && (**cmdArgs != (char) 39)) 
+        }
+
+        /* currRetVal stores the return value for the current iteration for the
+        * event loop that way it isnt cleared whenever a new loop starts*/
+        int currRetVal = 0;
+
+        //continuously get user input and calc the answer until they quit
+        while(!exit)
+        {
+            currRetVal = processEquationStr(&equationList, eqaStr, ansPtr);
+
+            if(currRetVal)
             {
-                if(eqaStr == NULL)
-                {
-                    //Set the last to delimit the end of the strin
-                    eqaStr = (char*) malloc(EQUATION_STR_LEN*sizeof(char));
-                    eqaStr[EQUATION_STR_LEN] = '\0';
-                }
-                strcat(eqaStr, *cmdArgs);
+                fprintf(stderr, "ERROR: could not process the equation string\n");
+                returnVal = currRetVal;
             }
             else
             {
-                outputPrgInfo(USEAGE); //tell the user what the cmd args are for and how to use the program
-                return 0;
+                double *lastPtr = ansPtr;
+                ansPtr = processPostfixEqa(equationList);
+                /* The last equations data may have been used in the processing of
+                * the equation so we cant delete it until we finish making the
+                * calculation. */
+                if(lastPtr != NULL)
+                {
+                    free(lastPtr);
+                    lastPtr = NULL;
+                }
+
+                /* There is nothing on the stack but as the memory
+                * is not cleared on free the stack logic thinks
+                * there is still data. */
+                equationList = NULL;
+                if(ansPtr == NULL)
+                {
+                    fprintf(stderr, "ERROR: could not process equation");
+                    returnVal = 2;
+                }
             }
-            cmdArgs++; //go to the next arg
-        }
-    }
 
-    //if we didn't have any args or didn't parse any equation from the args 
-    if(eqaStr == NULL)
-    {
-        //Set the last to delimit the end of the strin
-        eqaStr = (char*) malloc(EQUATION_STR_LEN*sizeof(char));
-        //get the user equation string
-        getUserEquation(eqaStr); 
-        //If the user wants to quit
-        if(isQuitString(eqaStr))
-        {
-            exit = true;
-        }
-    }
+            if(!currRetVal)
+                printResault(ansPtr);
 
-    /* currRetVal stores the return value for the current iteration for the
-     * event loop that way it isnt cleared whenever a new loop starts*/
-    int currRetVal = 0;
-    
-    //continuously get user input and calc the answer until they quit
-    while(!exit)
-    {
-        currRetVal = processEquationStr(&equationList, eqaStr, ansPtr);
-
-        if(currRetVal)
-        {
-            fprintf(stderr, "ERROR: could not process the equation string\n");
-            returnVal = currRetVal;
-        }
-        else
-        {
-            double *lastPtr = ansPtr;
-            ansPtr = processPostfixEqa(equationList);
-            /* The last equations data may have been used in the processing of
-             * the equation so we cant delete it until we finish making the
-             * calculation. */
-            if(lastPtr != NULL) 
+            getUserEquation(eqaStr);
+            //If the user wants to quit
+            if(isQuitString(eqaStr))
             {
-                free(lastPtr);
-                lastPtr = NULL;
-            }
-
-            /* There is nothing on the stack but as the memory
-            * is not cleared on free the stack logic thinks
-            * there is still data. */
-            equationList = NULL;
-            if(ansPtr == NULL)
-            {
-                fprintf(stderr, "ERROR: could not process equation");
-                returnVal = 2;
+                exit = true;
             }
         }
 
-        if(!currRetVal)
-            printResault(ansPtr);
-
-        getUserEquation(eqaStr);
-        //If the user wants to quit
-        if(isQuitString(eqaStr))
+        if(ansPtr != NULL)
         {
-            exit = true;
+            free(ansPtr);
+            ansPtr = NULL;
         }
-    }
 
-    if(ansPtr != NULL)
-    {
-        free(ansPtr);
-        ansPtr = NULL;
     }
-
     if(equationList != NULL) free(equationList);
     if(ansPtr != NULL) free(ansPtr);
     if(eqaStr != NULL) free(eqaStr);
+
     return returnVal; 
 }

@@ -28,13 +28,13 @@ void getUserEquation(char *eqaStr)
     char *eqaStrBegining = eqaStr;
 
     // clear the equation string so it can be reused
-    memset(eqaStr, 0, EQUATION_STR_LEN);
+    memset(eqaStr, 0, EQUATION_STR_SIZE);
 
     char tmpChar = 0xff;
     printf(":");
 
     int i;
-    for (i = 0; i < EQUATION_STR_LEN; i++)
+    for (i = 0; i < EQUATION_STR_SIZE; i++)
     {
         tmpChar = getchar();
 

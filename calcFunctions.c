@@ -246,7 +246,8 @@ double parseNumber(char **equation)
 //converts string to postfix
 /* TODO: refactor this whole function making using a struct to hold the state
  * so it can be passed to functions that work on the processing */
-//TODO: fix memeory leak (it might actuall be caused elseware)
+/*FIXME: Currently we dont check if a symbol has erroniously been placed at the
+ * begining of the input string causing a memory leak */
 int processEquationStr(LinkedList **equationQueue, char *equation, double *ans)
 {
     int ret = 0;
